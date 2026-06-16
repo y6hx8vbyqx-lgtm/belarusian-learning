@@ -20,7 +20,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.11.1-slower-voice-stress";
+const APP_VERSION = "v0.12.0-module-2-family";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -469,6 +469,368 @@ const lessons: Lesson[] = [
       { type: "finish", titleRu: "Модуль завершён", titleBe: "Модуль завершаны" },
     ],
   },
+
+  {
+    id: 11,
+    titleRu: "Мая семья",
+    titleBe: "Мая сям'я",
+    descriptionRu: "Семья, мать, отец, брат и сестра.",
+    descriptionBe: "Сям'я, маці, бацька, брат і сястра.",
+    words: [
+      { be: "сям'я", ru: "семья" },
+      { be: "маці", ru: "мать" },
+      { be: "мама", ru: "мама" },
+      { be: "бацька", ru: "отец" },
+      { be: "тата", ru: "папа" },
+      { be: "брат", ru: "брат" },
+      { be: "сястра", ru: "сестра" },
+      { be: "ёсць", ru: "есть" },
+      { be: "У мяне ёсць", ru: "У меня есть" },
+      { be: "Гэта мая сям'я", ru: "Это моя семья" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как рассказать о семье",
+        titleBe: "Як расказаць пра сям'ю",
+        theoryRu:
+          "Слово «сям'я» значит «семья». Чтобы сказать «у меня есть», используется фраза «У мяне ёсць». Примеры: У мяне ёсць брат. У мяне ёсць сястра. Гэта мая сям'я.",
+        theoryBe:
+          "Слова «сям'я» значыць «семья». Каб сказаць «у меня есть», выкарыстоўваем «У мяне ёсць». Прыклады: У мяне ёсць брат. У мяне ёсць сястра. Гэта мая сям'я.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "сям'я", ru: "семья" } },
+      { type: "audio", titleRu: "Послушай слово", titleBe: "Паслухай слова", word: { be: "маці", ru: "мать" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "бацька", ru: "отец" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "брат", ru: "брат" }, sentenceBe: "У мяне ёсць ____.", sentenceRu: "У меня есть брат." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "Гэта мая сям'я", sentenceRu: "Это моя семья", buildWords: ["сям'я", "мая", "Гэта"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 12,
+    titleRu: "Родственники",
+    titleBe: "Сваякі",
+    descriptionRu: "Бабушка, дедушка, сын и дочь.",
+    descriptionBe: "Бабуля, дзядуля, сын і дачка.",
+    words: [
+      { be: "бабуля", ru: "бабушка" },
+      { be: "дзядуля", ru: "дедушка" },
+      { be: "сын", ru: "сын" },
+      { be: "дачка", ru: "дочь" },
+      { be: "мой дзядуля", ru: "мой дедушка" },
+      { be: "мая бабуля", ru: "моя бабушка" },
+      { be: "мой сын", ru: "мой сын" },
+      { be: "мая дачка", ru: "моя дочь" },
+      { be: "родныя", ru: "родные" },
+      { be: "сваякі", ru: "родственники" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Бабушка и дедушка",
+        titleBe: "Бабуля і дзядуля",
+        theoryRu:
+          "Бабушка по-белорусски — бабуля. Дедушка — дзядуля. Можно сказать: Гэта мой дзядуля. Гэта мая бабуля. Обрати внимание: мой дзядуля, но мая бабуля.",
+        theoryBe:
+          "Бабушка па-беларуску — бабуля. Дедушка — дзядуля. Можна сказаць: Гэта мой дзядуля. Гэта мая бабуля.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "бабуля", ru: "бабушка" } },
+      { type: "audio", titleRu: "Послушай слово", titleBe: "Паслухай слова", word: { be: "дзядуля", ru: "дедушка" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "дачка", ru: "дочь" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "бабуля", ru: "бабушка" }, sentenceBe: "Гэта мая ____.", sentenceRu: "Это моя бабушка." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "Гэта мой дзядуля", sentenceRu: "Это мой дедушка", buildWords: ["дзядуля", "мой", "Гэта"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 13,
+    titleRu: "Мой, мая, маё",
+    titleBe: "Мой, мая, маё",
+    descriptionRu: "Мой брат, моя сестра, моё дитя.",
+    descriptionBe: "Мой брат, мая сястра, маё дзіця.",
+    words: [
+      { be: "мой", ru: "мой" },
+      { be: "мая", ru: "моя" },
+      { be: "маё", ru: "моё" },
+      { be: "мае", ru: "мои" },
+      { be: "твой", ru: "твой" },
+      { be: "твая", ru: "твоя" },
+      { be: "тваё", ru: "твоё" },
+      { be: "твае", ru: "твои" },
+      { be: "мой брат", ru: "мой брат" },
+      { be: "мая сястра", ru: "моя сестра" },
+      { be: "маё дзіця", ru: "мой ребёнок" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как сказать «мой»",
+        titleBe: "Як сказаць «мой»",
+        theoryRu:
+          "Пока не углубляемся в род. Просто запоминаем примеры: мой брат, мая сястра, маё дзіця, мае родныя. То же самое с «твой»: твой брат, твая сястра, тваё дзіця.",
+        theoryBe:
+          "Пакуль не паглыбляемся ў род. Проста запамінаем прыклады: мой брат, мая сястра, маё дзіця, мае родныя.",
+      },
+      { type: "translate", titleRu: "Выбери форму", titleBe: "Выберы форму", word: { be: "мая", ru: "моя" } },
+      { type: "audio", titleRu: "Послушай", titleBe: "Паслухай", word: { be: "мой брат", ru: "мой брат" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "маё дзіця", ru: "мой ребёнок" } },
+      { type: "fill", titleRu: "Вставь форму", titleBe: "Устаў форму", word: { be: "мая", ru: "моя" }, sentenceBe: "Гэта ____ сястра.", sentenceRu: "Это моя сестра." },
+      { type: "build", titleRu: "Собери фразу", titleBe: "Збяры фразу", sentenceBe: "Гэта мой брат", sentenceRu: "Это мой брат", buildWords: ["брат", "мой", "Гэта"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 14,
+    titleRu: "Люди",
+    titleBe: "Людзі",
+    descriptionRu: "Мужчина, женщина, парень, девушка, ребёнок.",
+    descriptionBe: "Мужчына, жанчына, хлопец, дзяўчына, дзіця.",
+    words: [
+      { be: "мужчына", ru: "мужчина" },
+      { be: "жанчына", ru: "женщина" },
+      { be: "хлопец", ru: "парень" },
+      { be: "дзяўчына", ru: "девушка" },
+      { be: "дзіця", ru: "ребёнок" },
+      { be: "чалавек", ru: "человек" },
+      { be: "людзі", ru: "люди" },
+      { be: "гэта", ru: "это" },
+      { be: "хлопчык", ru: "мальчик" },
+      { be: "дзяўчынка", ru: "девочка" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как называть людей",
+        titleBe: "Як называць людзей",
+        theoryRu:
+          "Гэта = это. Поэтому можно строить очень простые предложения: Гэта мужчына. Гэта жанчына. Гэта дзіця. Так ты уже можешь описывать людей вокруг.",
+        theoryBe:
+          "Гэта = это. Можна будаваць простыя сказы: Гэта мужчына. Гэта жанчына. Гэта дзіця.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "жанчына", ru: "женщина" } },
+      { type: "audio", titleRu: "Послушай", titleBe: "Паслухай", word: { be: "дзяўчына", ru: "девушка" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "дзіця", ru: "ребёнок" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "мужчына", ru: "мужчина" }, sentenceBe: "Гэта ____.", sentenceRu: "Это мужчина." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "Гэта дзяўчына", sentenceRu: "Это девушка", buildWords: ["дзяўчына", "Гэта", "сям'я"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 15,
+    titleRu: "Какой человек?",
+    titleBe: "Які чалавек?",
+    descriptionRu: "Добрый, умный, весёлый, красивый, молодой, старый.",
+    descriptionBe: "Добры, разумны, вясёлы, прыгожы, малады, стары.",
+    words: [
+      { be: "добры", ru: "добрый" },
+      { be: "разумны", ru: "умный" },
+      { be: "вясёлы", ru: "весёлый" },
+      { be: "прыгожы", ru: "красивый" },
+      { be: "малады", ru: "молодой" },
+      { be: "стары", ru: "старый" },
+      { be: "разумная", ru: "умная" },
+      { be: "вясёлая", ru: "весёлая" },
+      { be: "прыгожая", ru: "красивая" },
+      { be: "маладая", ru: "молодая" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как описывать человека",
+        titleBe: "Як апісваць чалавека",
+        theoryRu:
+          "Прилагательные помогают описывать людей. Мой брат добры. Мая сястра разумная. Пока просто запоминаем пары: брат добры, сястра разумная.",
+        theoryBe:
+          "Прыметнікі дапамагаюць апісваць людзей. Мой брат добры. Мая сястра разумная.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "разумны", ru: "умный" } },
+      { type: "audio", titleRu: "Послушай", titleBe: "Паслухай", word: { be: "вясёлы", ru: "весёлый" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "прыгожы", ru: "красивый" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "добры", ru: "добрый" }, sentenceBe: "Мой брат ____.", sentenceRu: "Мой брат добрый." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "Мая сястра разумная", sentenceRu: "Моя сестра умная", buildWords: ["разумная", "сястра", "Мая"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 16,
+    titleRu: "Числа 1–5",
+    titleBe: "Лікі 1–5",
+    descriptionRu: "Один, два, три, четыре, пять.",
+    descriptionBe: "Адзін, два, тры, чатыры, пяць.",
+    words: [
+      { be: "адзін", ru: "один" },
+      { be: "два", ru: "два" },
+      { be: "тры", ru: "три" },
+      { be: "чатыры", ru: "четыре" },
+      { be: "пяць", ru: "пять" },
+      { be: "адна", ru: "одна" },
+      { be: "адно", ru: "одно" },
+      { be: "два браты", ru: "два брата" },
+      { be: "тры сястры", ru: "три сестры" },
+      { be: "пяць чалавек", ru: "пять человек" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Числа от 1 до 5",
+        titleBe: "Лікі ад 1 да 5",
+        theoryRu:
+          "Числа нужны, чтобы говорить о семье. Адзін = один, два = два, тры = три, чатыры = четыре, пяць = пять. Примеры: У мяне два браты. У мяне тры сястры.",
+        theoryBe:
+          "Лікі патрэбныя, каб гаварыць пра сям'ю. Адзін, два, тры, чатыры, пяць. Прыклады: У мяне два браты. У мяне тры сястры.",
+      },
+      { type: "translate", titleRu: "Выбери число", titleBe: "Выберы лік", word: { be: "тры", ru: "три" } },
+      { type: "audio", titleRu: "Послушай число", titleBe: "Паслухай лік", word: { be: "пяць", ru: "пять" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "чатыры", ru: "четыре" } },
+      { type: "fill", titleRu: "Вставь число", titleBe: "Устаў лік", word: { be: "два", ru: "два" }, sentenceBe: "У мяне ____ браты.", sentenceRu: "У меня два брата." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "У мяне тры сястры", sentenceRu: "У меня три сестры", buildWords: ["сястры", "тры", "У мяне"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 17,
+    titleRu: "Числа 6–10",
+    titleBe: "Лікі 6–10",
+    descriptionRu: "Шесть, семь, восемь, девять, десять.",
+    descriptionBe: "Шэсць, сем, восем, дзевяць, дзесяць.",
+    words: [
+      { be: "шэсць", ru: "шесть" },
+      { be: "сем", ru: "семь" },
+      { be: "восем", ru: "восемь" },
+      { be: "дзевяць", ru: "девять" },
+      { be: "дзесяць", ru: "десять" },
+      { be: "шэсць чалавек", ru: "шесть человек" },
+      { be: "сем чалавек", ru: "семь человек" },
+      { be: "восем чалавек", ru: "восемь человек" },
+      { be: "дзевяць чалавек", ru: "девять человек" },
+      { be: "дзесяць чалавек", ru: "десять человек" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Числа от 6 до 10",
+        titleBe: "Лікі ад 6 да 10",
+        theoryRu:
+          "Продолжаем числа: шэсць, сем, восем, дзевяць, дзесяць. С ними можно отвечать на вопрос «сколько?»: У сям'і шэсць чалавек.",
+        theoryBe:
+          "Працягваем лікі: шэсць, сем, восем, дзевяць, дзесяць. З імі можна адказваць на пытанне «колькі?».",
+      },
+      { type: "translate", titleRu: "Выбери число", titleBe: "Выберы лік", word: { be: "сем", ru: "семь" } },
+      { type: "audio", titleRu: "Послушай число", titleBe: "Паслухай лік", word: { be: "дзевяць", ru: "девять" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "дзесяць", ru: "десять" } },
+      { type: "fill", titleRu: "Вставь число", titleBe: "Устаў лік", word: { be: "шэсць", ru: "шесть" }, sentenceBe: "У сям'і ____ чалавек.", sentenceRu: "В семье шесть человек." },
+      { type: "build", titleRu: "Собери фразу", titleBe: "Збяры фразу", sentenceBe: "дзесяць чалавек", sentenceRu: "десять человек", buildWords: ["чалавек", "дзесяць", "сям'я"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 18,
+    titleRu: "Сколько человек в семье?",
+    titleBe: "Колькі чалавек у сям'і?",
+    descriptionRu: "У моей семье три человека. Нас четверо.",
+    descriptionBe: "У маёй сям'і тры чалавекі. Нас чацвёра.",
+    words: [
+      { be: "У маёй сям'і", ru: "В моей семье" },
+      { be: "тры чалавекі", ru: "три человека" },
+      { be: "Нас двое", ru: "Нас двое" },
+      { be: "Нас трое", ru: "Нас трое" },
+      { be: "Нас чацвёра", ru: "Нас четверо" },
+      { be: "У мяне ёсць брат і сястра", ru: "У меня есть брат и сестра" },
+      { be: "колькі", ru: "сколько" },
+      { be: "чалавекі", ru: "человека" },
+      { be: "людзей", ru: "людей" },
+      { be: "разам", ru: "вместе" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как сказать «нас четверо»",
+        titleBe: "Як сказаць «нас чацвёра»",
+        theoryRu:
+          "Чтобы сказать сколько людей в семье, можно использовать две фразы: У маёй сям'і тры чалавекі. Или короче: Нас чацвёра. Это значит «нас четверо».",
+        theoryBe:
+          "Каб сказаць, колькі людзей у сям'і, можна выкарыстоўваць дзве фразы: У маёй сям'і тры чалавекі. Або карацей: Нас чацвёра.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "Нас трое", ru: "Нас трое" } },
+      { type: "audio", titleRu: "Послушай фразу", titleBe: "Паслухай фразу", word: { be: "Нас чацвёра", ru: "Нас четверо" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "У маёй сям'і", ru: "В моей семье" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "тры", ru: "три" }, sentenceBe: "У маёй сям'і ____ чалавекі.", sentenceRu: "В моей семье три человека." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "У маёй сям'і тры чалавекі", sentenceRu: "В моей семье три человека", buildWords: ["чалавекі", "тры", "У маёй сям'і"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 19,
+    titleRu: "Рассказ о семье",
+    titleBe: "Рассказ пра сям'ю",
+    descriptionRu: "Объединяем слова в небольшой текст.",
+    descriptionBe: "Злучаем словы ў невялікі тэкст.",
+    words: [
+      { be: "Гэта мая сям'я", ru: "Это моя семья" },
+      { be: "У мяне ёсць маці", ru: "У меня есть мать" },
+      { be: "У мяне ёсць бацька", ru: "У меня есть отец" },
+      { be: "У мяне ёсць брат", ru: "У меня есть брат" },
+      { be: "Мой брат разумны", ru: "Мой брат умный" },
+      { be: "Мая сястра вясёлая", ru: "Моя сестра весёлая" },
+      { be: "маці, бацька і брат", ru: "мать, отец и брат" },
+      { be: "сям'я вялікая", ru: "семья большая" },
+      { be: "сям'я малая", ru: "семья маленькая" },
+      { be: "я люблю сям'ю", ru: "я люблю семью" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Как рассказать о семье",
+        titleBe: "Як расказаць пра сям'ю",
+        theoryRu:
+          "Теперь соединяем всё в текст: Гэта мая сям'я. У мяне ёсць маці, бацька і брат. Мой брат разумны і вясёлы. Такой рассказ уже звучит как настоящая речь.",
+        theoryBe:
+          "Цяпер злучаем усё ў тэкст: Гэта мая сям'я. У мяне ёсць маці, бацька і брат. Мой брат разумны і вясёлы.",
+      },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "Гэта мая сям'я", ru: "Это моя семья" } },
+      { type: "audio", titleRu: "Послушай фразу", titleBe: "Паслухай фразу", word: { be: "Мой брат разумны", ru: "Мой брат умный" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "Мая сястра вясёлая", ru: "Моя сестра весёлая" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "сям'я", ru: "семья" }, sentenceBe: "Гэта мая ____.", sentenceRu: "Это моя семья." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "Мой брат разумны", sentenceRu: "Мой брат умный", buildWords: ["разумны", "брат", "Мой"] },
+      { type: "finish", titleRu: "Урок завершён", titleBe: "Урок завершаны" },
+    ],
+  },
+  {
+    id: 20,
+    titleRu: "Повторение и контроль",
+    titleBe: "Паўтарэнне і кантроль",
+    descriptionRu: "Родственники, люди, числа, мой/моя и рассказ.",
+    descriptionBe: "Сваякі, людзі, лікі, мой/мая і расказ.",
+    words: [
+      { be: "Прывітанне", ru: "Привет" },
+      { be: "Мяне завуць Андрэй", ru: "Меня зовут Андрей" },
+      { be: "Я з Беларусі", ru: "Я из Беларуси" },
+      { be: "Я студэнт", ru: "Я студент" },
+      { be: "У мяне ёсць сям'я", ru: "У меня есть семья" },
+      { be: "У мяне ёсць брат і сястра", ru: "У меня есть брат и сестра" },
+      { be: "Мой брат вясёлы", ru: "Мой брат весёлый" },
+      { be: "Мая сястра разумная", ru: "Моя сестра умная" },
+      { be: "У маёй сям'і чатыры чалавекі", ru: "В моей семье четыре человека" },
+      { be: "Прыемна пазнаёміцца", ru: "Приятно познакомиться" },
+    ],
+    tasks: [
+      {
+        type: "theory",
+        titleRu: "Итог модуля 2",
+        titleBe: "Вынік модуля 2",
+        theoryRu:
+          "После этого модуля ты можешь рассказать о семье: Прывітанне. Мяне завуць Андрэй. Я з Беларусі. У мяне ёсць сям'я. У мяне ёсць брат і сястра. Мой брат вясёлы, а мая сястра разумная.",
+        theoryBe:
+          "Пасля гэтага модуля ты можаш расказаць пра сям'ю: Прывітанне. Мяне завуць Андрэй. Я з Беларусі. У мяне ёсць сям'я. У мяне ёсць брат і сястра.",
+      },
+      { type: "audio", titleRu: "Послушай итоговую фразу", titleBe: "Паслухай выніковую фразу", word: { be: "У мяне ёсць сям'я", ru: "У меня есть семья" } },
+      { type: "translate", titleRu: "Выбери перевод", titleBe: "Выберы пераклад", word: { be: "Мая сястра разумная", ru: "Моя сестра умная" } },
+      { type: "trueFalse", titleRu: "Проверь пару", titleBe: "Правер пару", word: { be: "Мой брат вясёлы", ru: "Мой брат весёлый" } },
+      { type: "fill", titleRu: "Вставь слово", titleBe: "Устаў слова", word: { be: "сям'я", ru: "семья" }, sentenceBe: "У мяне ёсць ____.", sentenceRu: "У меня есть семья." },
+      { type: "build", titleRu: "Собери предложение", titleBe: "Збяры сказ", sentenceBe: "У мяне ёсць брат і сястра", sentenceRu: "У меня есть брат и сестра", buildWords: ["брат", "і", "сястра", "У мяне ёсць"] },
+      { type: "finish", titleRu: "Модуль завершён", titleBe: "Модуль завершаны" },
+    ],
+  },
 ];
 
 const allWords: Word[] = lessons.flatMap((lesson) => lesson.words);
@@ -804,6 +1166,7 @@ function wrongRu(correct: string, lesson: Lesson) {
 export default function Home() {
   const [lang, setLang] = useState<Lang>("ru");
   const [screen, setScreen] = useState<Screen>("landing");
+  const [selectedModule, setSelectedModule] = useState(1);
   const [mode, setMode] = useState<AuthMode>("register");
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -825,6 +1188,14 @@ export default function Home() {
   const finishTask = selectedLesson.tasks.find((task) => task.type === "finish") || selectedLesson.tasks[selectedLesson.tasks.length - 1];
   const currentTask = reviewMode ? reviewTasks[reviewIndex] || finishTask : selectedLesson.tasks[taskIndex];
   const currentWord = currentTask?.word || selectedLesson.words[0];
+  const module1Lessons = lessons.filter((lesson) => lesson.id <= 10);
+  const module2Lessons = lessons.filter((lesson) => lesson.id > 10 && lesson.id <= 20);
+  const selectedModuleLessons = selectedModule === 1 ? module1Lessons : module2Lessons;
+  const module1Completed = (profile?.completedLessons || 0) >= 10;
+  const currentModuleCompletedCount =
+    selectedModule === 1
+      ? Math.min(profile?.completedLessons || 0, 10)
+      : Math.max(Math.min((profile?.completedLessons || 0) - 10, 10), 0);
 
   const beOptions = useMemo(() => {
     return [...new Set([currentWord.be, ...wrongBe(currentWord.be, selectedLesson)])]
@@ -933,6 +1304,7 @@ export default function Home() {
   }
 
   function startLesson(lessonId: number) {
+    setSelectedModule(lessonId <= 10 ? 1 : 2);
     setSelectedLessonId(lessonId);
     setTaskIndex(0);
     setAnswer(null);
@@ -969,7 +1341,7 @@ export default function Home() {
       ...profile,
       completedLessons: Math.max(profile.completedLessons || 0, selectedLessonId),
       xp: (profile.xp || 0) + 50,
-      learnedWords: Math.min((profile.learnedWords || 0) + selectedLesson.words.length, 150),
+      learnedWords: Math.min((profile.learnedWords || 0) + selectedLesson.words.length, 300),
     };
 
     setProfile(updated);
@@ -1132,7 +1504,7 @@ export default function Home() {
               </div>
               <div className="mt-6 grid gap-3">
                 <InfoRow label={t.registered} value={profile?.registeredAtText || "—"} />
-                <InfoRow label={t.learned} value={`${profile?.learnedWords || 0}/150`} />
+                <InfoRow label={t.learned} value={`${profile?.learnedWords || 0}/300`} />
                 <InfoRow label={t.lessons} value={`${profile?.completedLessons || 0}/${lessons.length}`} />
                 <InfoRow label={t.xp} value={`${profile?.xp || 0}`} />
                 <InfoRow label={t.streak} value={`${profile?.streak || 0}`} />
@@ -1156,15 +1528,62 @@ export default function Home() {
             <p className="font-black uppercase tracking-[0.2em] text-lime-700">{t.lessonMap}</p>
             <h1 className="mt-2 text-5xl font-black">{t.home}</h1>
 
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              <button
+                onClick={() => setSelectedModule(1)}
+                className={`rounded-[2rem] p-5 text-left shadow-sm ${
+                  selectedModule === 1 ? "bg-lime-500 text-white" : "bg-white"
+                }`}
+              >
+                <p className="text-sm font-black opacity-80">МОДУЛЬ 1</p>
+                <h2 className="mt-2 text-2xl font-black">
+                  {lang === "ru" ? "Первые шаги" : "Першыя крокі"}
+                </h2>
+                <p className="mt-2 font-bold opacity-80">{Math.min(profile?.completedLessons || 0, 10)}/10</p>
+              </button>
+
+              <button
+                onClick={() => module1Completed && setSelectedModule(2)}
+                disabled={!module1Completed}
+                className={`rounded-[2rem] p-5 text-left shadow-sm ${
+                  selectedModule === 2
+                    ? "bg-lime-500 text-white"
+                    : module1Completed
+                    ? "bg-white"
+                    : "bg-white/60 text-slate-400"
+                }`}
+              >
+                <p className="text-sm font-black opacity-80">{module1Completed ? "МОДУЛЬ 2" : "🔒 МОДУЛЬ 2"}</p>
+                <h2 className="mt-2 text-2xl font-black">
+                  {lang === "ru" ? "Семья и люди" : "Сям'я і людзі"}
+                </h2>
+                <p className="mt-2 font-bold opacity-80">
+                  {module1Completed ? `${Math.max(Math.min((profile?.completedLessons || 0) - 10, 10), 0)}/10` : "Откроется после Модуля 1"}
+                </p>
+              </button>
+            </div>
+
+            {selectedModule === 2 && module1Completed && (
+              <div className="mt-5 rounded-[2rem] bg-white p-5 shadow-sm">
+                <p className="font-black text-lime-700">👨‍👩‍👧‍👦 {lang === "ru" ? "Модуль 2 открыт" : "Модуль 2 адкрыты"}</p>
+                <p className="mt-2 font-bold text-slate-600">
+                  {lang === "ru"
+                    ? "Теперь учимся рассказывать о семье, людях, числах и простых описаниях."
+                    : "Цяпер вучымся расказваць пра сям'ю, людзей, лікі і простыя апісанні."}
+                </p>
+              </div>
+            )}
+
             <div className="mt-6 grid gap-4">
-              {lessons.map((lesson) => {
+              {selectedModuleLessons.map((lesson) => {
                 const completed = (profile?.completedLessons || 0) >= lesson.id;
                 const unlocked = lesson.id === 1 || (profile?.completedLessons || 0) >= lesson.id - 1;
+                const lessonNumber = lesson.id <= 10 ? lesson.id : lesson.id - 10;
 
                 return (
                   <LessonCard
                     key={lesson.id}
-                    title={`${t.lesson} ${lesson.id}. ${lang === "ru" ? lesson.titleRu : lesson.titleBe}`}
+                    title={`${t.lesson} ${lessonNumber}. ${lang === "ru" ? lesson.titleRu : lesson.titleBe}`}
                     description={lang === "ru" ? lesson.descriptionRu : lesson.descriptionBe}
                     status={completed ? t.done : unlocked ? t.open : t.locked}
                     active={unlocked}
@@ -1198,7 +1617,7 @@ export default function Home() {
                 <p className="text-sm font-black text-lime-300">
                   {reviewMode
                     ? `${t.reviewMistakes} · ${reviewIndex + 1}/${reviewTasks.length}`
-                    : `${t.lesson} ${selectedLesson.id} · ${taskIndex + 1}/${selectedLesson.tasks.length}`}
+                    : `${t.lesson} ${selectedLesson.id <= 10 ? selectedLesson.id : selectedLesson.id - 10} · ${taskIndex + 1}/${selectedLesson.tasks.length}`}
                 </p>
                 <h1 className="text-3xl font-black">{lang === "ru" ? currentTask.titleRu : currentTask.titleBe}</h1>
               </div>
