@@ -12,15 +12,21 @@ import {
   type User,
 } from "firebase/auth";
 import {
+  addDoc,
+  collection,
+  deleteDoc,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.13.0-notes-dictionary";
+const APP_VERSION = "v0.14.0-materials-admin";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -37,7 +43,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 type Lang = "ru" | "be";
-type Screen = "landing" | "auth" | "home" | "lesson" | "words" | "notes" | "dictionary";
+type Screen = "landing" | "auth" | "home" | "lesson" | "words" | "notes" | "dictionary" | "materials";
 type AuthMode = "login" | "register";
 type TaskType = "theory" | "translate" | "audio" | "trueFalse" | "fill" | "build" | "finish";
 
@@ -76,6 +82,37 @@ type Lesson = {
   words: Word[];
   tasks: Task[];
 };
+
+type MaterialTestType = "choice" | "text";
+
+type MaterialCategory = {
+  id: string;
+  name: string;
+};
+
+type StudyMaterial = {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  videoUrl: string;
+  audioUrl: string;
+  hasTest: boolean;
+  testType: MaterialTestType;
+  question: string;
+  options: string[];
+  answer: string;
+};
+
+const ADMIN_EMAILS = ["hidehrouden@gmail.com"];
+
+const defaultMaterialCategories: MaterialCategory[] = [
+  { id: "default-textbooks", name: "Учебники" },
+  { id: "default-tasks", name: "Задания" },
+  { id: "default-grammar", name: "Грамматика" },
+  { id: "default-video", name: "Видео" },
+  { id: "default-audio", name: "Аудио" },
+];
 
 
 const lessons: Lesson[] = [
@@ -1094,6 +1131,7 @@ const tr = {
     wordsMode: "Учить слова",
     notes: "Напоминания",
     dictionary: "Словарь",
+    materials: "Учебные материалы",
     lessonMap: "Карта уроков",
     open: "Доступно",
     locked: "Закрыто",
@@ -1153,6 +1191,7 @@ const tr = {
     wordsMode: "Вучыць словы",
     notes: "Напаміны",
     dictionary: "Слоўнік",
+    materials: "Вучэбныя матэрыялы",
     lessonMap: "Мапа ўрокаў",
     open: "Даступна",
     locked: "Закрыта",
@@ -1417,6 +1456,24 @@ export default function Home() {
   const [reviewTasks, setReviewTasks] = useState<Task[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [reviewMode, setReviewMode] = useState(false);
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [materialCategories, setMaterialCategories] = useState<MaterialCategory[]>(defaultMaterialCategories);
+  const [selectedMaterialCategory, setSelectedMaterialCategory] = useState("all");
+  const [showMaterialForm, setShowMaterialForm] = useState(false);
+  const [showCategoryEditor, setShowCategoryEditor] = useState(false);
+  const [materialTitle, setMaterialTitle] = useState("");
+  const [materialCategory, setMaterialCategory] = useState(defaultMaterialCategories[0].name);
+  const [materialContent, setMaterialContent] = useState("");
+  const [materialVideoUrl, setMaterialVideoUrl] = useState("");
+  const [materialAudioUrl, setMaterialAudioUrl] = useState("");
+  const [materialHasTest, setMaterialHasTest] = useState(false);
+  const [materialTestType, setMaterialTestType] = useState<MaterialTestType>("choice");
+  const [materialQuestion, setMaterialQuestion] = useState("");
+  const [materialOptionsText, setMaterialOptionsText] = useState("");
+  const [materialAnswer, setMaterialAnswer] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [materialAnswers, setMaterialAnswers] = useState<Record<string, string>>({});
+  const [materialFeedback, setMaterialFeedback] = useState<Record<string, string>>({});
 
   const t = tr[lang];
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0];
@@ -1431,6 +1488,11 @@ export default function Home() {
     selectedModule === 1
       ? Math.min(profile?.completedLessons || 0, 10)
       : Math.max(Math.min((profile?.completedLessons || 0) - 10, 10), 0);
+  const isAdmin = Boolean(user?.email && ADMIN_EMAILS.includes(user.email));
+  const visibleMaterials =
+    selectedMaterialCategory === "all"
+      ? materials
+      : materials.filter((material) => material.category === selectedMaterialCategory);
 
   const beOptions = useMemo(() => {
     return [...new Set([currentWord.be, ...wrongBe(currentWord.be, selectedLesson)])]
@@ -1479,10 +1541,141 @@ export default function Home() {
         setProfile(newProfile);
       }
 
+      await loadMaterialCategories();
+      await loadMaterials();
       setScreen("home");
       setLoading(false);
     });
   }, []);
+
+
+  async function loadMaterialCategories() {
+    try {
+      const snap = await getDocs(query(collection(db, "materialCategories"), orderBy("name")));
+      const loaded = snap.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<MaterialCategory, "id">) }));
+      const merged = [...defaultMaterialCategories];
+
+      loaded.forEach((category) => {
+        if (!merged.some((item) => item.name === category.name)) merged.push(category);
+      });
+
+      setMaterialCategories(merged);
+      if (!merged.some((category) => category.name === materialCategory)) {
+        setMaterialCategory(merged[0]?.name || "Учебники");
+      }
+    } catch (error) {
+      console.error("Failed to load material categories", error);
+      setMaterialCategories(defaultMaterialCategories);
+    }
+  }
+
+  async function loadMaterials() {
+    try {
+      const snap = await getDocs(query(collection(db, "materials"), orderBy("createdAt", "desc")));
+      const loaded = snap.docs.map((item) => {
+        const data = item.data() as Omit<StudyMaterial, "id">;
+        return {
+          id: item.id,
+          title: data.title || "Без названия",
+          category: data.category || "Учебники",
+          content: data.content || "",
+          videoUrl: data.videoUrl || "",
+          audioUrl: data.audioUrl || "",
+          hasTest: Boolean(data.hasTest),
+          testType: data.testType || "choice",
+          question: data.question || "",
+          options: Array.isArray(data.options) ? data.options : [],
+          answer: data.answer || "",
+        };
+      });
+
+      setMaterials(loaded);
+    } catch (error) {
+      console.error("Failed to load materials", error);
+      setMaterials([]);
+    }
+  }
+
+  function resetMaterialForm() {
+    setMaterialTitle("");
+    setMaterialCategory(materialCategories[0]?.name || "Учебники");
+    setMaterialContent("");
+    setMaterialVideoUrl("");
+    setMaterialAudioUrl("");
+    setMaterialHasTest(false);
+    setMaterialTestType("choice");
+    setMaterialQuestion("");
+    setMaterialOptionsText("");
+    setMaterialAnswer("");
+  }
+
+  async function addMaterial() {
+    if (!isAdmin || !materialTitle.trim()) return;
+
+    const options = materialOptionsText
+      .split("\n")
+      .map((option) => option.trim())
+      .filter(Boolean);
+
+    await addDoc(collection(db, "materials"), {
+      title: materialTitle.trim(),
+      category: materialCategory || "Учебники",
+      content: materialContent.trim(),
+      videoUrl: materialVideoUrl.trim(),
+      audioUrl: materialAudioUrl.trim(),
+      hasTest: materialHasTest,
+      testType: materialTestType,
+      question: materialQuestion.trim(),
+      options,
+      answer: materialAnswer.trim(),
+      createdAt: serverTimestamp(),
+    });
+
+    resetMaterialForm();
+    setShowMaterialForm(false);
+    await loadMaterials();
+  }
+
+  async function addMaterialCategory() {
+    if (!isAdmin || !newCategoryName.trim()) return;
+
+    const name = newCategoryName.trim();
+
+    if (materialCategories.some((category) => category.name.toLowerCase() === name.toLowerCase())) {
+      setNewCategoryName("");
+      return;
+    }
+
+    await addDoc(collection(db, "materialCategories"), {
+      name,
+      createdAt: serverTimestamp(),
+    });
+
+    setNewCategoryName("");
+    await loadMaterialCategories();
+  }
+
+  async function deleteMaterial(materialId: string) {
+    if (!isAdmin) return;
+    await deleteDoc(doc(db, "materials", materialId));
+    await loadMaterials();
+  }
+
+  async function deleteMaterialCategory(category: MaterialCategory) {
+    if (!isAdmin || category.id.startsWith("default-")) return;
+    await deleteDoc(doc(db, "materialCategories", category.id));
+    await loadMaterialCategories();
+  }
+
+  function checkMaterialAnswer(material: StudyMaterial) {
+    const userAnswer = (materialAnswers[material.id] || "").trim().toLowerCase();
+    const correctAnswer = (material.answer || "").trim().toLowerCase();
+
+    setMaterialFeedback((feedback) => ({
+      ...feedback,
+      [material.id]: userAnswer && userAnswer === correctAnswer ? t.correct : `${t.wrong} ${material.answer}`,
+    }));
+  }
 
   function changeLang(value: Lang) {
     setLang(value);
@@ -1535,6 +1728,8 @@ export default function Home() {
 
   async function logout() {
     await signOut(auth);
+    setMaterials([]);
+    setMaterialCategories(defaultMaterialCategories);
     setScreen("landing");
   }
 
@@ -1649,6 +1844,7 @@ export default function Home() {
         t={t}
         user={user}
         goHome={() => setScreen(user ? "home" : "landing")}
+        openMaterials={() => setScreen(user ? "materials" : "auth")}
         login={() => {
           setMode("login");
           setScreen("auth");
@@ -1845,6 +2041,55 @@ export default function Home() {
         </section>
       )}
 
+
+      {screen === "materials" && (
+        <MaterialsScreen
+          t={t}
+          lang={lang}
+          user={user}
+          isAdmin={isAdmin}
+          materials={visibleMaterials}
+          allMaterials={materials}
+          categories={materialCategories}
+          selectedCategory={selectedMaterialCategory}
+          setSelectedCategory={setSelectedMaterialCategory}
+          showMaterialForm={showMaterialForm}
+          setShowMaterialForm={setShowMaterialForm}
+          showCategoryEditor={showCategoryEditor}
+          setShowCategoryEditor={setShowCategoryEditor}
+          materialTitle={materialTitle}
+          setMaterialTitle={setMaterialTitle}
+          materialCategory={materialCategory}
+          setMaterialCategory={setMaterialCategory}
+          materialContent={materialContent}
+          setMaterialContent={setMaterialContent}
+          materialVideoUrl={materialVideoUrl}
+          setMaterialVideoUrl={setMaterialVideoUrl}
+          materialAudioUrl={materialAudioUrl}
+          setMaterialAudioUrl={setMaterialAudioUrl}
+          materialHasTest={materialHasTest}
+          setMaterialHasTest={setMaterialHasTest}
+          materialTestType={materialTestType}
+          setMaterialTestType={setMaterialTestType}
+          materialQuestion={materialQuestion}
+          setMaterialQuestion={setMaterialQuestion}
+          materialOptionsText={materialOptionsText}
+          setMaterialOptionsText={setMaterialOptionsText}
+          materialAnswer={materialAnswer}
+          setMaterialAnswer={setMaterialAnswer}
+          newCategoryName={newCategoryName}
+          setNewCategoryName={setNewCategoryName}
+          materialAnswers={materialAnswers}
+          setMaterialAnswers={setMaterialAnswers}
+          materialFeedback={materialFeedback}
+          back={() => setScreen("home")}
+          addMaterial={addMaterial}
+          addMaterialCategory={addMaterialCategory}
+          deleteMaterial={deleteMaterial}
+          deleteMaterialCategory={deleteMaterialCategory}
+          checkMaterialAnswer={checkMaterialAnswer}
+        />
+      )}
 
       {screen === "notes" && (
         <NotesScreen t={t} lang={lang} back={() => setScreen("home")} />
@@ -2166,6 +2411,344 @@ function OptionGrid({ options, answer, correct, choose, audio = false }: { optio
   );
 }
 
+function MaterialsScreen({
+  t,
+  lang,
+  user,
+  isAdmin,
+  materials,
+  allMaterials,
+  categories,
+  selectedCategory,
+  setSelectedCategory,
+  showMaterialForm,
+  setShowMaterialForm,
+  showCategoryEditor,
+  setShowCategoryEditor,
+  materialTitle,
+  setMaterialTitle,
+  materialCategory,
+  setMaterialCategory,
+  materialContent,
+  setMaterialContent,
+  materialVideoUrl,
+  setMaterialVideoUrl,
+  materialAudioUrl,
+  setMaterialAudioUrl,
+  materialHasTest,
+  setMaterialHasTest,
+  materialTestType,
+  setMaterialTestType,
+  materialQuestion,
+  setMaterialQuestion,
+  materialOptionsText,
+  setMaterialOptionsText,
+  materialAnswer,
+  setMaterialAnswer,
+  newCategoryName,
+  setNewCategoryName,
+  materialAnswers,
+  setMaterialAnswers,
+  materialFeedback,
+  back,
+  addMaterial,
+  addMaterialCategory,
+  deleteMaterial,
+  deleteMaterialCategory,
+  checkMaterialAnswer,
+}: {
+  t: typeof tr.ru;
+  lang: Lang;
+  user: User | null;
+  isAdmin: boolean;
+  materials: StudyMaterial[];
+  allMaterials: StudyMaterial[];
+  categories: MaterialCategory[];
+  selectedCategory: string;
+  setSelectedCategory: (value: string) => void;
+  showMaterialForm: boolean;
+  setShowMaterialForm: (value: boolean) => void;
+  showCategoryEditor: boolean;
+  setShowCategoryEditor: (value: boolean) => void;
+  materialTitle: string;
+  setMaterialTitle: (value: string) => void;
+  materialCategory: string;
+  setMaterialCategory: (value: string) => void;
+  materialContent: string;
+  setMaterialContent: (value: string) => void;
+  materialVideoUrl: string;
+  setMaterialVideoUrl: (value: string) => void;
+  materialAudioUrl: string;
+  setMaterialAudioUrl: (value: string) => void;
+  materialHasTest: boolean;
+  setMaterialHasTest: (value: boolean) => void;
+  materialTestType: MaterialTestType;
+  setMaterialTestType: (value: MaterialTestType) => void;
+  materialQuestion: string;
+  setMaterialQuestion: (value: string) => void;
+  materialOptionsText: string;
+  setMaterialOptionsText: (value: string) => void;
+  materialAnswer: string;
+  setMaterialAnswer: (value: string) => void;
+  newCategoryName: string;
+  setNewCategoryName: (value: string) => void;
+  materialAnswers: Record<string, string>;
+  setMaterialAnswers: (value: Record<string, string> | ((answers: Record<string, string>) => Record<string, string>)) => void;
+  materialFeedback: Record<string, string>;
+  back: () => void;
+  addMaterial: () => void;
+  addMaterialCategory: () => void;
+  deleteMaterial: (id: string) => void;
+  deleteMaterialCategory: (category: MaterialCategory) => void;
+  checkMaterialAnswer: (material: StudyMaterial) => void;
+}) {
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+        ← {t.back}
+      </button>
+
+      <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="font-black uppercase tracking-[0.2em] text-lime-300">Materials</p>
+            <h1 className="mt-2 text-5xl font-black">{t.materials}</h1>
+            <p className="mt-4 max-w-2xl text-lg font-bold text-slate-300">
+              {lang === "ru"
+                ? "Материалы, которые админ добавляет для всех пользователей: тексты, задания, тесты, видео и аудио."
+                : "Матэрыялы, якія адміністратар дадае для ўсіх карыстальнікаў: тэксты, заданні, тэсты, відэа і аўдыя."}
+            </p>
+          </div>
+
+          {isAdmin && (
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setShowMaterialForm(!showMaterialForm)} className="rounded-2xl bg-lime-500 px-5 py-3 font-black text-white">
+                + Материал
+              </button>
+              <button onClick={() => setShowCategoryEditor(!showCategoryEditor)} className="rounded-2xl bg-white/10 px-5 py-3 font-black text-white">
+                ⚙ Фильтры
+              </button>
+            </div>
+          )}
+        </div>
+
+        {isAdmin && (
+          <p className="mt-4 rounded-2xl bg-white/10 p-3 text-sm font-bold text-slate-300">
+            Админ: {user?.email}. Если это не твой email, поменяй ADMIN_EMAILS в коде.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          onClick={() => setSelectedCategory("all")}
+          className={`rounded-full px-5 py-3 font-black ${selectedCategory === "all" ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
+        >
+          Все ({allMaterials.length})
+        </button>
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.name)}
+            className={`rounded-full px-5 py-3 font-black ${selectedCategory === category.name ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
+      {isAdmin && showCategoryEditor && (
+        <div className="mt-5 rounded-[2rem] bg-white p-6 shadow-sm">
+          <h2 className="text-3xl font-black">Фильтры материалов</h2>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <input
+              value={newCategoryName}
+              onChange={(event) => setNewCategoryName(event.target.value)}
+              placeholder="Новый фильтр, например: Аудио"
+              className="flex-1 rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            />
+            <button onClick={addMaterialCategory} className="rounded-2xl bg-lime-500 px-6 py-4 font-black text-white">
+              Добавить
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <span key={category.id} className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 font-black">
+                {category.name}
+                {isAdmin && !category.id.startsWith("default-") && (
+                  <button onClick={() => deleteMaterialCategory(category)} className="text-red-500">×</button>
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isAdmin && showMaterialForm && (
+        <div className="mt-5 rounded-[2rem] bg-white p-6 shadow-sm">
+          <h2 className="text-3xl font-black">Новый материал</h2>
+          <div className="mt-5 grid gap-3">
+            <input
+              value={materialTitle}
+              onChange={(event) => setMaterialTitle(event.target.value)}
+              placeholder="Название"
+              className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            />
+            <select
+              value={materialCategory}
+              onChange={(event) => setMaterialCategory(event.target.value)}
+              className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>{category.name}</option>
+              ))}
+            </select>
+            <textarea
+              value={materialContent}
+              onChange={(event) => setMaterialContent(event.target.value)}
+              placeholder="Содержание материала"
+              rows={8}
+              className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            />
+            <input
+              value={materialVideoUrl}
+              onChange={(event) => setMaterialVideoUrl(event.target.value)}
+              placeholder="Ссылка на видео"
+              className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            />
+            <input
+              value={materialAudioUrl}
+              onChange={(event) => setMaterialAudioUrl(event.target.value)}
+              placeholder="Ссылка на аудио"
+              className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+            />
+
+            <label className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-4 font-black">
+              <span>Добавить тест</span>
+              <input type="checkbox" checked={materialHasTest} onChange={(event) => setMaterialHasTest(event.target.checked)} />
+            </label>
+
+            {materialHasTest && (
+              <div className="grid gap-3 rounded-2xl bg-slate-50 p-4">
+                <select
+                  value={materialTestType}
+                  onChange={(event) => setMaterialTestType(event.target.value as MaterialTestType)}
+                  className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                >
+                  <option value="choice">Выбор из вариантов</option>
+                  <option value="text">Ввод ответа</option>
+                </select>
+                <input
+                  value={materialQuestion}
+                  onChange={(event) => setMaterialQuestion(event.target.value)}
+                  placeholder="Вопрос"
+                  className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                />
+                {materialTestType === "choice" && (
+                  <textarea
+                    value={materialOptionsText}
+                    onChange={(event) => setMaterialOptionsText(event.target.value)}
+                    placeholder="Варианты ответа, каждый с новой строки"
+                    rows={4}
+                    className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                  />
+                )}
+                <input
+                  value={materialAnswer}
+                  onChange={(event) => setMaterialAnswer(event.target.value)}
+                  placeholder="Правильный ответ"
+                  className="rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                />
+              </div>
+            )}
+
+            <button onClick={addMaterial} className="rounded-2xl bg-lime-500 py-4 font-black text-white shadow-[0_5px_0_#65a30d]">
+              Сохранить материал
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-4">
+        {materials.length === 0 ? (
+          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+            <p className="text-4xl">📭</p>
+            <h2 className="mt-3 text-2xl font-black">Материалов пока нет</h2>
+          </div>
+        ) : (
+          materials.map((material) => (
+            <article key={material.id} className="rounded-[2rem] bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">{material.category}</p>
+                  <h2 className="mt-3 text-3xl font-black">{material.title}</h2>
+                </div>
+                {isAdmin && (
+                  <button onClick={() => deleteMaterial(material.id)} className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600">
+                    Удалить
+                  </button>
+                )}
+              </div>
+
+              <p className="mt-5 whitespace-pre-wrap text-lg font-bold leading-8 text-slate-700">{material.content}</p>
+
+              {(material.videoUrl || material.audioUrl) && (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {material.videoUrl && (
+                    <a href={material.videoUrl} target="_blank" className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white">
+                      🎥 Видео
+                    </a>
+                  )}
+                  {material.audioUrl && (
+                    <a href={material.audioUrl} target="_blank" className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white">
+                      🔊 Аудио
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {material.hasTest && (
+                <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+                  <p className="font-black uppercase tracking-[0.18em] text-lime-700">Тест</p>
+                  <h3 className="mt-2 text-2xl font-black">{material.question}</h3>
+
+                  {material.testType === "choice" ? (
+                    <div className="mt-4 grid gap-2">
+                      {material.options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setMaterialAnswers((answers) => ({ ...answers, [material.id]: option }))}
+                          className={`rounded-2xl px-4 py-3 text-left font-black ${materialAnswers[material.id] === option ? "bg-lime-500 text-white" : "bg-white"}`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <input
+                      value={materialAnswers[material.id] || ""}
+                      onChange={(event) => setMaterialAnswers((answers) => ({ ...answers, [material.id]: event.target.value }))}
+                      placeholder="Введи ответ"
+                      className="mt-4 w-full rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                    />
+                  )}
+
+                  <button onClick={() => checkMaterialAnswer(material)} className="mt-4 rounded-2xl bg-lime-500 px-6 py-3 font-black text-white">
+                    {t.check}
+                  </button>
+                  {materialFeedback[material.id] && (
+                    <p className="mt-3 rounded-2xl bg-white p-4 font-black">{materialFeedback[material.id]}</p>
+                  )}
+                </div>
+              )}
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
 function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
   return (
     <section className="mx-auto max-w-5xl px-5 py-8">
@@ -2269,7 +2852,23 @@ function WordsTrainer({ t, words, index, setIndex, back }: { t: typeof tr.ru; wo
   );
 }
 
-function Header({ t, user, goHome, login, register, logout }: { t: typeof tr.ru; user: User | null; goHome: () => void; login: () => void; register: () => void; logout: () => void }) {
+function Header({
+  t,
+  user,
+  goHome,
+  openMaterials,
+  login,
+  register,
+  logout,
+}: {
+  t: typeof tr.ru;
+  user: User | null;
+  goHome: () => void;
+  openMaterials: () => void;
+  login: () => void;
+  register: () => void;
+  logout: () => void;
+}) {
   return (
     <header className="sticky top-3 z-40 mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-3xl border border-lime-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur">
       <button onClick={goHome} className="flex items-center gap-3 text-left">
@@ -2279,10 +2878,11 @@ function Header({ t, user, goHome, login, register, logout }: { t: typeof tr.ru;
           <h1 className="text-lg font-black">Вывучай беларускую</h1>
         </div>
       </button>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         {user ? (
           <>
             <button onClick={goHome} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">{t.home}</button>
+            <button onClick={openMaterials} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">{t.materials}</button>
             <button onClick={logout} className="rounded-2xl bg-slate-950 px-4 py-3 font-black text-white">{t.logout}</button>
           </>
         ) : (
