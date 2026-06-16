@@ -20,7 +20,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.10.0-learning-rules-voice";
+const APP_VERSION = "v0.11.0-review-mistakes-footer-language";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -517,6 +517,8 @@ const tr = {
     wrong: "Неправильно. Ответ:",
     next: "Дальше",
     finishLesson: "Завершить урок",
+    reviewMistakes: "Повторить ошибки",
+    reviewText: "Ты почти закончил урок. Сначала переделаем задания, где был неверный ответ.",
     check: "Проверить",
     yes: "Верно",
     no: "Неверно",
@@ -572,6 +574,8 @@ const tr = {
     wrong: "Няправільна. Адказ:",
     next: "Далей",
     finishLesson: "Завяршыць урок",
+    reviewMistakes: "Паўтарыць памылкі",
+    reviewText: "Ты амаль скончыў урок. Спачатку пераробім заданні, дзе быў няправільны адказ.",
     check: "Праверыць",
     yes: "Правільна",
     no: "Няправільна",
@@ -665,10 +669,14 @@ export default function Home() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [wordTrainerIndex, setWordTrainerIndex] = useState(0);
   const [builtWords, setBuiltWords] = useState<string[]>([]);
+  const [reviewTasks, setReviewTasks] = useState<Task[]>([]);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewMode, setReviewMode] = useState(false);
 
   const t = tr[lang];
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0];
-  const currentTask = selectedLesson.tasks[taskIndex];
+  const finishTask = selectedLesson.tasks.find((task) => task.type === "finish") || selectedLesson.tasks[selectedLesson.tasks.length - 1];
+  const currentTask = reviewMode ? reviewTasks[reviewIndex] || finishTask : selectedLesson.tasks[taskIndex];
   const currentWord = currentTask?.word || selectedLesson.words[0];
 
   const beOptions = useMemo(() => {
@@ -682,6 +690,10 @@ export default function Home() {
       .slice(0, 3)
       .sort(() => Math.random() - 0.5);
   }, [currentWord.ru, selectedLesson]);
+
+  useEffect(() => {
+    console.log(`Belarusian Learning version: ${APP_VERSION}`);
+  }, []);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("site-lang");
@@ -778,12 +790,28 @@ export default function Home() {
     setTaskIndex(0);
     setAnswer(null);
     setBuiltWords([]);
+    setReviewTasks([]);
+    setReviewIndex(0);
+    setReviewMode(false);
     setScreen("lesson");
   }
 
   function nextTask() {
     setAnswer(null);
     setBuiltWords([]);
+
+    if (reviewMode) {
+      if (reviewIndex + 1 < reviewTasks.length) {
+        setReviewIndex((value) => value + 1);
+      } else {
+        setReviewMode(false);
+        setReviewTasks([]);
+        setReviewIndex(0);
+        setTaskIndex(selectedLesson.tasks.findIndex((task) => task.type === "finish"));
+      }
+      return;
+    }
+
     setTaskIndex((value) => value + 1);
   }
 
@@ -809,14 +837,48 @@ export default function Home() {
     setScreen("home");
   }
 
+  function rememberMistakeIfNeeded(isCorrect: boolean) {
+    if (isCorrect || reviewMode || currentTask.type === "theory" || currentTask.type === "finish") return;
+
+    setReviewTasks((tasks) => {
+      const alreadyAdded = tasks.some(
+        (task) =>
+          task.type === currentTask.type &&
+          task.titleRu === currentTask.titleRu &&
+          task.word?.be === currentTask.word?.be &&
+          task.sentenceBe === currentTask.sentenceBe
+      );
+
+      return alreadyAdded ? tasks : [...tasks, currentTask];
+    });
+  }
+
   function choose(option: string) {
     if (answer) return;
+
     setAnswer(option);
+
+    const isCorrect =
+      option === currentWord.be ||
+      option === currentWord.ru ||
+      option === "true";
+
+    rememberMistakeIfNeeded(isCorrect);
   }
 
   function checkBuiltSentence(correctSentence: string) {
     if (answer) return;
-    setAnswer(builtWords.join(" "));
+
+    const userSentence = builtWords.join(" ");
+    setAnswer(userSentence);
+    rememberMistakeIfNeeded(userSentence === correctSentence);
+  }
+
+  function startReview() {
+    setAnswer(null);
+    setBuiltWords([]);
+    setReviewMode(true);
+    setReviewIndex(0);
   }
 
   if (loading) {
@@ -987,7 +1049,9 @@ export default function Home() {
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-black text-lime-300">
-                  {t.lesson} {selectedLesson.id} · {taskIndex + 1}/{selectedLesson.tasks.length}
+                  {reviewMode
+                    ? `${t.reviewMistakes} · ${reviewIndex + 1}/${reviewTasks.length}`
+                    : `${t.lesson} ${selectedLesson.id} · ${taskIndex + 1}/${selectedLesson.tasks.length}`}
                 </p>
                 <h1 className="text-3xl font-black">{lang === "ru" ? currentTask.titleRu : currentTask.titleBe}</h1>
               </div>
@@ -1027,7 +1091,11 @@ export default function Home() {
               />
             )}
 
-            {currentTask.type === "finish" && (
+            {currentTask.type === "finish" && !reviewMode && reviewTasks.length > 0 && (
+              <ReviewMistakesTask t={t} count={reviewTasks.length} startReview={startReview} />
+            )}
+
+            {currentTask.type === "finish" && (reviewMode || reviewTasks.length === 0) && (
               <FinishTask t={t} lesson={selectedLesson} lang={lang} finishLesson={finishLesson} />
             )}
 
@@ -1064,10 +1132,9 @@ export default function Home() {
         />
       )}
 
-      <div className="fixed bottom-1 right-2 z-50 text-[10px] font-medium text-slate-300/70">
-        {APP_VERSION}
-      </div>
-      <LanguageSwitch lang={lang} setLang={changeLang} t={t} />
+      <footer className="mx-auto mt-16 max-w-6xl px-5 pb-10">
+        <LanguageSwitch lang={lang} setLang={changeLang} t={t} />
+      </footer>
     </main>
   );
 }
@@ -1202,6 +1269,34 @@ function BuildTask({
         className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d] disabled:bg-slate-300 disabled:shadow-none"
       >
         {t.check}
+      </button>
+    </>
+  );
+}
+
+function ReviewMistakesTask({
+  t,
+  count,
+  startReview,
+}: {
+  t: typeof tr.ru;
+  count: number;
+  startReview: () => void;
+}) {
+  return (
+    <>
+      <div className="rounded-3xl bg-white p-6 text-center text-slate-950">
+        <p className="text-6xl">🧠</p>
+        <h2 className="mt-3 text-4xl font-black">{t.reviewMistakes}</h2>
+        <p className="mt-3 text-lg font-bold text-slate-500">{t.reviewText}</p>
+        <p className="mt-5 text-2xl font-black text-amber-600">{count}</p>
+      </div>
+
+      <button
+        onClick={startReview}
+        className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
+      >
+        {t.reviewMistakes}
       </button>
     </>
   );
@@ -1346,15 +1441,17 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function LanguageSwitch({ lang, setLang, t }: { lang: Lang; setLang: (lang: Lang) => void; t: typeof tr.ru }) {
   return (
-    <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-slate-200 bg-white p-2 shadow-xl">
-      <div className="flex items-center gap-2">
-        <span className="hidden pl-3 text-sm font-black text-slate-500 sm:block">{t.language}</span>
-        <button onClick={() => setLang("ru")} className={`rounded-full px-4 py-2 text-sm font-black ${lang === "ru" ? "bg-lime-500 text-white" : "text-slate-500"}`}>
-          RU
-        </button>
-        <button onClick={() => setLang("be")} className={`rounded-full px-4 py-2 text-sm font-black ${lang === "be" ? "bg-lime-500 text-white" : "text-slate-500"}`}>
-          BY
-        </button>
+    <div className="flex justify-center">
+      <div className="rounded-full border border-slate-200 bg-white p-2 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="pl-3 text-sm font-black text-slate-500">{t.language}</span>
+          <button onClick={() => setLang("ru")} className={`rounded-full px-4 py-2 text-sm font-black ${lang === "ru" ? "bg-lime-500 text-white" : "text-slate-500"}`}>
+            RU
+          </button>
+          <button onClick={() => setLang("be")} className={`rounded-full px-4 py-2 text-sm font-black ${lang === "be" ? "bg-lime-500 text-white" : "text-slate-500"}`}>
+            BY
+          </button>
+        </div>
       </div>
     </div>
   );
