@@ -26,7 +26,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.14.2-material-reader";
+const APP_VERSION = "v0.15.0-mobile-ui";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -1832,7 +1832,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f7ef] text-2xl font-black">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f7ef] text-xl sm:text-2xl font-black">
         {t.loading}
       </main>
     );
@@ -1862,14 +1862,14 @@ export default function Home() {
             <p className="mb-5 inline-flex rounded-full bg-lime-100 px-4 py-2 font-black text-lime-700">
               A1 · Belarusian Learning
             </p>
-            <h1 className="text-5xl font-black tracking-tight sm:text-7xl">{t.title}</h1>
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight sm:text-7xl">{t.title}</h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">{t.subtitle}</p>
             <button
               onClick={() => {
                 setMode("register");
                 setScreen("auth");
               }}
-              className="mt-7 rounded-2xl bg-lime-500 px-8 py-4 text-lg font-black text-white shadow-[0_6px_0_#65a30d]"
+              className="mt-7 rounded-2xl bg-lime-500 px-8 py-4 text-base sm:text-lg font-black text-white shadow-[0_6px_0_#65a30d]"
             >
               {t.start}
             </button>
@@ -1880,8 +1880,8 @@ export default function Home() {
 
       {screen === "auth" && (
         <section className="mx-auto max-w-xl px-5 py-12">
-          <div className="rounded-[2rem] bg-white p-6 shadow-xl">
-            <h1 className="text-4xl font-black">{t.authTitle}</h1>
+          <div className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-xl">
+            <h1 className="text-3xl sm:text-4xl font-black">{t.authTitle}</h1>
             <div className="mt-6 space-y-3">
               <input
                 value={email}
@@ -1923,9 +1923,9 @@ export default function Home() {
       {screen === "home" && (
         <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[0.82fr_1.18fr]">
           <aside className="space-y-5">
-            <div className="rounded-[2rem] bg-white p-6 shadow-sm">
+            <div className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-lime-400 text-3xl font-black">
+                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-lime-400 text-2xl sm:text-3xl font-black">
                   ў
                 </div>
                 <div>
@@ -1942,9 +1942,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-sm">
+            <div className="rounded-[2rem] bg-slate-950 p-4 sm:p-6 text-white shadow-sm">
               <p className="font-black uppercase tracking-[0.2em] text-lime-300">{t.course}</p>
-              <h2 className="mt-2 text-3xl font-black">{t.lessonMap}</h2>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-black">{t.lessonMap}</h2>
               <p className="mt-4 leading-7 text-slate-300">{t.courseGoal}</p>
               <button
                 onClick={() => setScreen("words")}
@@ -1969,9 +1969,9 @@ export default function Home() {
 
           <section>
             <p className="font-black uppercase tracking-[0.2em] text-lime-700">{t.lessonMap}</p>
-            <h1 className="mt-2 text-5xl font-black">{t.home}</h1>
+            <h1 className="mt-2 text-3xl sm:text-5xl font-black">{t.home}</h1>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <div className="mt-5 grid grid-cols-1 gap-3 md:mt-6 md:grid-cols-2">
               <button
                 onClick={() => setSelectedModule(1)}
                 className={`rounded-[2rem] p-5 text-left shadow-sm ${
@@ -1979,7 +1979,7 @@ export default function Home() {
                 }`}
               >
                 <p className="text-sm font-black opacity-80">МОДУЛЬ 1</p>
-                <h2 className="mt-2 text-2xl font-black">
+                <h2 className="mt-2 text-xl sm:text-2xl font-black">
                   {lang === "ru" ? "Первые шаги" : "Першыя крокі"}
                 </h2>
                 <p className="mt-2 font-bold opacity-80">{Math.min(profile?.completedLessons || 0, 10)}/10</p>
@@ -1997,7 +1997,7 @@ export default function Home() {
                 }`}
               >
                 <p className="text-sm font-black opacity-80">{module1Completed ? "МОДУЛЬ 2" : "🔒 МОДУЛЬ 2"}</p>
-                <h2 className="mt-2 text-2xl font-black">
+                <h2 className="mt-2 text-xl sm:text-2xl font-black">
                   {lang === "ru" ? "Семья и люди" : "Сям'я і людзі"}
                 </h2>
                 <p className="mt-2 font-bold opacity-80">
@@ -2101,7 +2101,7 @@ export default function Home() {
 
       {screen === "lesson" && (
         <section className="mx-auto max-w-3xl px-5 py-8">
-          <button onClick={() => setScreen("home")} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+          <button onClick={() => setScreen("home")} className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm">
             ← {t.back}
           </button>
 
@@ -2120,7 +2120,7 @@ export default function Home() {
                     ? `${t.reviewMistakes} · ${reviewIndex + 1}/${reviewTasks.length}`
                     : `${t.lesson} ${selectedLesson.id <= 10 ? selectedLesson.id : selectedLesson.id - 10} · ${taskIndex + 1}/${selectedLesson.tasks.length}`}
                 </p>
-                <h1 className="text-3xl font-black">{lang === "ru" ? currentTask.titleRu : currentTask.titleBe}</h1>
+                <h1 className="text-2xl sm:text-3xl font-black">{lang === "ru" ? currentTask.titleRu : currentTask.titleBe}</h1>
               </div>
               <span className="rounded-full bg-lime-400 px-3 py-1 text-sm font-black text-slate-950">
                 +50 XP
@@ -2179,7 +2179,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={nextTask}
-                  className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
+                  className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
                 >
                   {t.next}
                 </button>
@@ -2209,11 +2209,11 @@ export default function Home() {
 function TheoryTask({ t, task, lang, nextTask }: { t: typeof tr.ru; task: Task; lang: Lang; nextTask: () => void }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.theory}</p>
         <p className="mt-4 text-xl font-bold leading-9">{lang === "ru" ? task.theoryRu : task.theoryBe}</p>
       </div>
-      <button onClick={nextTask} className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
+      <button onClick={nextTask} className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
         {t.next}
       </button>
     </>
@@ -2223,9 +2223,9 @@ function TheoryTask({ t, task, lang, nextTask }: { t: typeof tr.ru; task: Task; 
 function TranslationTask({ t, word, options, answer, choose }: { t: typeof tr.ru; word: Word; options: string[]; answer: string | null; choose: (option: string) => void }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.chooseTranslation}</p>
-        <p className="mt-2 text-6xl font-black">{word.ru}</p>
+        <p className="mt-2 text-4xl sm:text-6xl font-black">{word.ru}</p>
       </div>
       <OptionGrid options={options} answer={answer} correct={word.be} choose={choose} audio />
     </>
@@ -2235,9 +2235,9 @@ function TranslationTask({ t, word, options, answer, choose }: { t: typeof tr.ru
 function AudioTask({ t, word, options, answer, choose }: { t: typeof tr.ru; word: Word; options: string[]; answer: string | null; choose: (option: string) => void }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.listenAndChoose}</p>
-        <button onClick={() => speak(word.be)} className="mt-3 rounded-2xl bg-lime-500 px-6 py-4 text-2xl font-black text-white shadow-[0_5px_0_#65a30d]">
+        <button onClick={() => speak(word.be)} className="mt-3 rounded-2xl bg-lime-500 px-6 py-4 text-xl sm:text-2xl font-black text-white shadow-[0_5px_0_#65a30d]">
           🔊 {t.listen}
         </button>
       </div>
@@ -2249,14 +2249,14 @@ function AudioTask({ t, word, options, answer, choose }: { t: typeof tr.ru; word
 function TrueFalseTask({ t, word, answer, choose }: { t: typeof tr.ru; word: Word; answer: string | null; choose: (option: string) => void }) {
   return (
     <>
-      <button onClick={() => speak(word.be)} className="w-full rounded-3xl bg-white p-6 text-left text-slate-950">
+      <button onClick={() => speak(word.be)} className="w-full rounded-3xl bg-white p-4 sm:p-6 text-left text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.trueFalse}</p>
-        <p className="mt-2 text-6xl font-black">{getDisplayBe(word.be)} 🔊</p>
+        <p className="mt-2 text-4xl sm:text-6xl font-black">{getDisplayBe(word.be)} 🔊</p>
         <p className="mt-3 text-xl font-black text-slate-500">{getDisplayBe(word.be)} = {word.ru}</p>
       </button>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button onClick={() => choose("true")} disabled={Boolean(answer)} className="rounded-2xl bg-lime-500 px-5 py-4 text-lg font-black text-white">{t.yes}</button>
-        <button onClick={() => choose("false")} disabled={Boolean(answer)} className="rounded-2xl bg-red-500 px-5 py-4 text-lg font-black text-white">{t.no}</button>
+        <button onClick={() => choose("true")} disabled={Boolean(answer)} className="rounded-2xl bg-lime-500 px-5 py-4 text-base sm:text-lg font-black text-white">{t.yes}</button>
+        <button onClick={() => choose("false")} disabled={Boolean(answer)} className="rounded-2xl bg-red-500 px-5 py-4 text-base sm:text-lg font-black text-white">{t.no}</button>
       </div>
     </>
   );
@@ -2265,10 +2265,10 @@ function TrueFalseTask({ t, word, answer, choose }: { t: typeof tr.ru; word: Wor
 function FillTask({ task, word, options, answer, choose }: { task: Task; word: Word; options: string[]; answer: string | null; choose: (option: string) => void }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Прыклад</p>
-        <p className="mt-2 text-3xl font-black">{task.sentenceBe}</p>
-        <p className="mt-3 text-lg font-bold text-slate-500">{task.sentenceRu}</p>
+        <p className="mt-2 text-2xl sm:text-3xl font-black">{task.sentenceBe}</p>
+        <p className="mt-3 text-base sm:text-lg font-bold text-slate-500">{task.sentenceRu}</p>
       </div>
       <OptionGrid options={options} answer={answer} correct={word.be} choose={choose} audio />
     </>
@@ -2294,9 +2294,9 @@ function BuildTask({
 
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.buildSentence}</p>
-        <p className="mt-3 text-lg font-bold text-slate-500">{task.sentenceRu}</p>
+        <p className="mt-3 text-base sm:text-lg font-bold text-slate-500">{task.sentenceRu}</p>
 
         <div className="mt-5 min-h-20 rounded-2xl border-2 border-dashed border-slate-200 p-4">
           {builtWords.length === 0 ? (
@@ -2333,7 +2333,7 @@ function BuildTask({
       <button
         onClick={check}
         disabled={Boolean(answer) || builtWords.length === 0}
-        className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d] disabled:bg-slate-300 disabled:shadow-none"
+        className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d] disabled:bg-slate-300 disabled:shadow-none"
       >
         {t.check}
       </button>
@@ -2352,16 +2352,16 @@ function ReviewMistakesTask({
 }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-center text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-center text-slate-950">
         <p className="text-6xl">🧠</p>
-        <h2 className="mt-3 text-4xl font-black">{t.reviewMistakes}</h2>
-        <p className="mt-3 text-lg font-bold text-slate-500">{t.reviewText}</p>
-        <p className="mt-5 text-2xl font-black text-amber-600">{count}</p>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-black">{t.reviewMistakes}</h2>
+        <p className="mt-3 text-base sm:text-lg font-bold text-slate-500">{t.reviewText}</p>
+        <p className="mt-5 text-xl sm:text-2xl font-black text-amber-600">{count}</p>
       </div>
 
       <button
         onClick={startReview}
-        className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
+        className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
       >
         {t.reviewMistakes}
       </button>
@@ -2372,13 +2372,13 @@ function ReviewMistakesTask({
 function FinishTask({ t, lesson, lang, finishLesson }: { t: typeof tr.ru; lesson: Lesson; lang: Lang; finishLesson: () => void }) {
   return (
     <>
-      <div className="rounded-3xl bg-white p-6 text-center text-slate-950">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 text-center text-slate-950">
         <p className="text-6xl">🎉</p>
-        <h2 className="mt-3 text-4xl font-black">{lang === "ru" ? "Урок завершён" : "Урок завершаны"}</h2>
-        <p className="mt-3 text-lg font-bold text-slate-500">{lang === "ru" ? lesson.titleRu : lesson.titleBe}</p>
-        <p className="mt-5 text-2xl font-black text-lime-600">+50 XP</p>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-black">{lang === "ru" ? "Урок завершён" : "Урок завершаны"}</h2>
+        <p className="mt-3 text-base sm:text-lg font-bold text-slate-500">{lang === "ru" ? lesson.titleRu : lesson.titleBe}</p>
+        <p className="mt-5 text-xl sm:text-2xl font-black text-lime-600">+50 XP</p>
       </div>
-      <button onClick={finishLesson} className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
+      <button onClick={finishLesson} className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
         {t.finishLesson}
       </button>
     </>
@@ -2396,7 +2396,7 @@ function OptionGrid({ options, answer, correct, choose, audio = false }: { optio
             choose(option);
           }}
           disabled={Boolean(answer)}
-          className={`rounded-2xl border-2 px-5 py-4 text-left text-lg font-black transition ${
+          className={`rounded-2xl border-2 px-5 py-4 text-left text-base sm:text-lg font-black transition ${
             answer && option === correct
               ? "border-lime-400 bg-lime-400 text-slate-950"
               : answer === option
@@ -2518,21 +2518,21 @@ function MaterialsScreen({
 
   if (openedMaterial) {
     return (
-      <section className="mx-auto max-w-4xl px-5 py-8">
+      <section className="mx-auto max-w-4xl px-4 py-5 sm:px-5 sm:py-8">
         <button
           onClick={() => setOpenedMaterial(null)}
-          className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm"
+          className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm"
         >
           ← {lang === "ru" ? "К списку материалов" : "Да спісу матэрыялаў"}
         </button>
 
-        <article className="rounded-[2rem] bg-white p-6 shadow-xl">
+        <article className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-xl">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">
                 {openedMaterial.category}
               </p>
-              <h1 className="mt-4 text-4xl font-black">{openedMaterial.title}</h1>
+              <h1 className="mt-4 text-3xl sm:text-4xl font-black">{openedMaterial.title}</h1>
             </div>
 
             {isAdmin && (
@@ -2541,14 +2541,14 @@ function MaterialsScreen({
                   deleteMaterial(openedMaterial.id);
                   setOpenedMaterial(null);
                 }}
-                className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600"
+                className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 sm:text-base"
               >
                 Удалить
               </button>
             )}
           </div>
 
-          <div className="mt-7 whitespace-pre-wrap text-lg font-bold leading-9 text-slate-700">
+          <div className="mt-7 whitespace-pre-wrap text-base sm:text-lg font-bold leading-9 text-slate-700">
             {openedMaterial.content || "Содержание пока не добавлено."}
           </div>
 
@@ -2558,7 +2558,7 @@ function MaterialsScreen({
                 <a
                   href={openedMaterial.videoUrl}
                   target="_blank"
-                  className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white"
+                  className="rounded-2xl bg-slate-950 px-4 py-3 text-sm sm:px-5 sm:text-base font-black text-white"
                 >
                   🎥 Видео
                 </a>
@@ -2567,7 +2567,7 @@ function MaterialsScreen({
                 <a
                   href={openedMaterial.audioUrl}
                   target="_blank"
-                  className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white"
+                  className="rounded-2xl bg-slate-950 px-4 py-3 text-sm sm:px-5 sm:text-base font-black text-white"
                 >
                   🔊 Аудио
                 </a>
@@ -2578,7 +2578,7 @@ function MaterialsScreen({
           {openedMaterial.hasTest && (
             <div className="mt-8 rounded-2xl bg-slate-50 p-5">
               <p className="font-black uppercase tracking-[0.18em] text-lime-700">Тест</p>
-              <h3 className="mt-2 text-2xl font-black">{openedMaterial.question}</h3>
+              <h3 className="mt-2 text-xl sm:text-2xl font-black">{openedMaterial.question}</h3>
 
               {openedMaterial.testType === "choice" ? (
                 <div className="mt-4 grid gap-2">
@@ -2621,17 +2621,17 @@ function MaterialsScreen({
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-5 py-8">
-      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+    <section className="mx-auto max-w-6xl px-4 py-5 sm:px-5 sm:py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm">
         ← {t.back}
       </button>
 
-      <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
+      <div className="rounded-[2rem] bg-slate-950 p-4 sm:p-6 text-white shadow-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="font-black uppercase tracking-[0.2em] text-lime-300">Materials</p>
-            <h1 className="mt-2 text-5xl font-black">{t.materials}</h1>
-            <p className="mt-4 max-w-2xl text-lg font-bold text-slate-300">
+            <h1 className="mt-2 text-3xl sm:text-5xl font-black">{t.materials}</h1>
+            <p className="mt-4 max-w-2xl text-base sm:text-lg font-bold text-slate-300">
               {lang === "ru"
                 ? "Дополнительные материалы для изучения белорусского языка: тексты, упражнения, объяснения, видео и аудио."
                 : "Дадатковыя матэрыялы для вывучэння беларускай мовы: тэксты, практыкаванні, тлумачэнні, відэа і аўдыя."}
@@ -2640,10 +2640,10 @@ function MaterialsScreen({
 
           {isAdmin && (
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => setShowMaterialForm(!showMaterialForm)} className="rounded-2xl bg-lime-500 px-5 py-3 font-black text-white">
+              <button onClick={() => setShowMaterialForm(!showMaterialForm)} className="rounded-2xl bg-lime-500 px-4 py-3 text-sm sm:px-5 sm:text-base font-black text-white">
                 + Материал
               </button>
-              <button onClick={() => setShowCategoryEditor(!showCategoryEditor)} className="rounded-2xl bg-white/10 px-5 py-3 font-black text-white">
+              <button onClick={() => setShowCategoryEditor(!showCategoryEditor)} className="rounded-2xl bg-white/10 px-4 py-3 text-sm sm:px-5 sm:text-base font-black text-white">
                 ⚙ Фильтры
               </button>
             </div>
@@ -2657,10 +2657,10 @@ function MaterialsScreen({
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-nowrap gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0">
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`rounded-full px-5 py-3 font-black ${selectedCategory === "all" ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
+          className={`rounded-full px-4 py-3 text-sm sm:px-5 sm:text-base font-black ${selectedCategory === "all" ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
         >
           Все ({allMaterials.length})
         </button>
@@ -2668,7 +2668,7 @@ function MaterialsScreen({
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.name)}
-            className={`rounded-full px-5 py-3 font-black ${selectedCategory === category.name ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
+            className={`rounded-full px-4 py-3 text-sm sm:px-5 sm:text-base font-black ${selectedCategory === category.name ? "bg-lime-500 text-white" : "bg-white text-slate-600"}`}
           >
             {category.name}
           </button>
@@ -2676,8 +2676,8 @@ function MaterialsScreen({
       </div>
 
       {isAdmin && showCategoryEditor && (
-        <div className="mt-5 rounded-[2rem] bg-white p-6 shadow-sm">
-          <h2 className="text-3xl font-black">Фильтры материалов</h2>
+        <div className="mt-5 rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
+          <h2 className="text-2xl sm:text-3xl font-black">Фильтры материалов</h2>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <input
               value={newCategoryName}
@@ -2685,7 +2685,7 @@ function MaterialsScreen({
               placeholder="Новый фильтр, например: Аудио"
               className="flex-1 rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
             />
-            <button onClick={addMaterialCategory} className="rounded-2xl bg-lime-500 px-6 py-4 font-black text-white">
+            <button onClick={addMaterialCategory} className="rounded-2xl bg-lime-500 px-4 py-3 text-sm sm:px-6 sm:py-4 sm:text-base font-black text-white">
               Добавить
             </button>
           </div>
@@ -2703,9 +2703,9 @@ function MaterialsScreen({
       )}
 
       {isAdmin && showMaterialForm && (
-        <div className="mt-5 rounded-[2rem] bg-white p-6 shadow-sm">
-          <h2 className="text-3xl font-black">Новый материал</h2>
-          <div className="mt-5 grid gap-3">
+        <div className="mt-5 rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
+          <h2 className="text-2xl sm:text-3xl font-black">Новый материал</h2>
+          <div className="mt-4 grid gap-3 sm:mt-5">
             <input
               value={materialTitle}
               onChange={(event) => setMaterialTitle(event.target.value)}
@@ -2780,43 +2780,43 @@ function MaterialsScreen({
               </div>
             )}
 
-            <button onClick={addMaterial} className="rounded-2xl bg-lime-500 py-4 font-black text-white shadow-[0_5px_0_#65a30d]">
+            <button onClick={addMaterial} className="w-full rounded-2xl bg-lime-500 py-4 font-black text-white shadow-[0_5px_0_#65a30d]">
               Сохранить материал
             </button>
           </div>
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-4 md:mt-6 md:grid-cols-2">
         {materials.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm md:col-span-2">
+          <div className="rounded-[2rem] bg-white p-4 sm:p-6 text-center shadow-sm md:col-span-2">
             <p className="text-4xl">📭</p>
-            <h2 className="mt-3 text-2xl font-black">Материалов пока нет</h2>
+            <h2 className="mt-3 text-xl sm:text-2xl font-black">Материалов пока нет</h2>
           </div>
         ) : (
           materials.map((material) => (
-            <article key={material.id} className="rounded-[2rem] bg-white p-6 shadow-sm">
+            <article key={material.id} className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
               <div className="flex h-full flex-col">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">
                       {material.category}
                     </p>
-                    <h2 className="mt-3 text-3xl font-black">{material.title}</h2>
+                    <h2 className="mt-3 text-2xl sm:text-3xl font-black">{material.title}</h2>
                   </div>
 
                   {isAdmin && (
-                    <button onClick={() => deleteMaterial(material.id)} className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600">
+                    <button onClick={() => deleteMaterial(material.id)} className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 sm:text-base">
                       Удалить
                     </button>
                   )}
                 </div>
 
-                <p className="mt-4 text-base font-bold leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-bold leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-7">
                   {shortDescription(material)}
                 </p>
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-nowrap gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0">
                   {material.hasTest && (
                     <span className="rounded-full bg-sky-100 px-3 py-1 text-sm font-black text-sky-700">Тест</span>
                   )}
@@ -2846,15 +2846,15 @@ function MaterialsScreen({
 
 function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
   return (
-    <section className="mx-auto max-w-5xl px-5 py-8">
-      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+    <section className="mx-auto max-w-5xl px-4 py-5 sm:px-5 sm:py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm">
         ← {t.back}
       </button>
 
-      <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
+      <div className="rounded-[2rem] bg-slate-950 p-4 sm:p-6 text-white shadow-xl">
         <p className="font-black uppercase tracking-[0.2em] text-lime-300">Grammar notes</p>
-        <h1 className="mt-2 text-5xl font-black">{t.notes}</h1>
-        <p className="mt-4 max-w-2xl text-lg font-bold text-slate-300">
+        <h1 className="mt-2 text-3xl sm:text-5xl font-black">{t.notes}</h1>
+        <p className="mt-4 max-w-2xl text-base sm:text-lg font-bold text-slate-300">
           {lang === "ru"
             ? "Короткие правила и шаблоны, чтобы быстро вспомнить, как строить предложения."
             : "Кароткія правілы і шаблоны, каб хутка ўспомніць, як будаваць сказы."}
@@ -2863,14 +2863,14 @@ function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () 
 
       <div className="mt-6 grid gap-4">
         {grammarNotes.map((note) => (
-          <article key={`${note.module}-${note.titleRu}`} className="rounded-[2rem] bg-white p-6 shadow-sm">
+          <article key={`${note.module}-${note.titleRu}`} className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
             <p className="font-black uppercase tracking-[0.18em] text-lime-700">{note.module}</p>
-            <h2 className="mt-2 text-3xl font-black">{lang === "ru" ? note.titleRu : note.titleBe}</h2>
-            <p className="mt-4 text-lg font-bold leading-8 text-slate-600">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black">{lang === "ru" ? note.titleRu : note.titleBe}</h2>
+            <p className="mt-4 text-base sm:text-lg font-bold leading-8 text-slate-600">
               {lang === "ru" ? note.ruleRu : note.ruleBe}
             </p>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-4 grid gap-3 sm:mt-5">
               {note.examples.map((example) => (
                 <button
                   key={`${example.be}-${example.ru}`}
@@ -2891,15 +2891,15 @@ function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () 
 
 function DictionaryScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
   return (
-    <section className="mx-auto max-w-5xl px-5 py-8">
-      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+    <section className="mx-auto max-w-5xl px-4 py-5 sm:px-5 sm:py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm">
         ← {t.back}
       </button>
 
-      <div className="rounded-[2rem] bg-white p-6 shadow-xl">
+      <div className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-xl">
         <p className="font-black uppercase tracking-[0.2em] text-lime-700">Vocabulary</p>
-        <h1 className="mt-2 text-5xl font-black">{t.dictionary}</h1>
-        <p className="mt-4 max-w-2xl text-lg font-bold text-slate-600">
+        <h1 className="mt-2 text-3xl sm:text-5xl font-black">{t.dictionary}</h1>
+        <p className="mt-4 max-w-2xl text-base sm:text-lg font-bold text-slate-600">
           {lang === "ru"
             ? "Все изученные слова по разделам. Нажимай на белорусское слово, чтобы услышать произношение."
             : "Усе вывучаныя словы па раздзелах. Націскай на беларускае слова, каб пачуць вымаўленне."}
@@ -2908,8 +2908,8 @@ function DictionaryScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back
 
       <div className="mt-6 grid gap-4">
         {dictionarySections.map((section) => (
-          <article key={section.titleRu} className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <h2 className="text-3xl font-black">{lang === "ru" ? section.titleRu : section.titleBe}</h2>
+          <article key={section.titleRu} className="rounded-[2rem] bg-white p-4 sm:p-6 shadow-sm">
+            <h2 className="text-2xl sm:text-3xl font-black">{lang === "ru" ? section.titleRu : section.titleBe}</h2>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {section.words.map((word) => (
                 <button
@@ -2934,12 +2934,12 @@ function WordsTrainer({ t, words, index, setIndex, back }: { t: typeof tr.ru; wo
 
   return (
     <section className="mx-auto max-w-3xl px-5 py-8">
-      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">← {t.back}</button>
-      <div className="rounded-[2rem] bg-white p-6 text-center shadow-xl">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-4 py-3 text-sm sm:px-5 sm:text-base font-black shadow-sm">← {t.back}</button>
+      <div className="rounded-[2rem] bg-white p-4 sm:p-6 text-center shadow-xl">
         <p className="font-black uppercase tracking-[0.2em] text-lime-700">{t.wordsMode}</p>
-        <button onClick={() => speak(word.be)} className="mt-8 text-7xl font-black">{getDisplayBe(word.be)} 🔊</button>
-        <p className="mt-5 text-3xl font-black text-slate-500">{word.ru}</p>
-        <button onClick={() => setIndex((value) => value + 1)} className="mt-8 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
+        <button onClick={() => speak(word.be)} className="mt-8 text-4xl sm:text-7xl font-black">{getDisplayBe(word.be)} 🔊</button>
+        <p className="mt-5 text-2xl sm:text-3xl font-black text-slate-500">{word.ru}</p>
+        <button onClick={() => setIndex((value) => value + 1)} className="mt-8 w-full rounded-2xl bg-lime-500 py-4 text-base sm:text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
           {t.next}
         </button>
       </div>
@@ -2965,25 +2965,25 @@ function Header({
   logout: () => void;
 }) {
   return (
-    <header className="sticky top-3 z-40 mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-3xl border border-lime-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur">
-      <button onClick={goHome} className="flex items-center gap-3 text-left">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-400 text-2xl font-black">ў</div>
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-lime-700">Belarusian Learning</p>
-          <h1 className="text-lg font-black">Вывучай беларускую</h1>
+    <header className="sticky top-2 z-40 mx-3 mt-2 flex max-w-6xl flex-col gap-3 rounded-3xl border border-lime-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:top-3 sm:mx-auto sm:mt-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+      <button onClick={goHome} className="flex w-full items-center gap-3 text-left sm:w-auto">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lime-400 text-xl font-black sm:h-12 sm:w-12 sm:text-2xl">ў</div>
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-lime-700 sm:text-xs sm:tracking-[0.2em]">Belarusian Learning</p>
+          <h1 className="truncate text-base font-black sm:text-lg">Вывучай беларускую</h1>
         </div>
       </button>
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
         {user ? (
           <>
-            <button onClick={goHome} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">{t.home}</button>
-            <button onClick={openMaterials} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">{t.materials}</button>
-            <button onClick={logout} className="rounded-2xl bg-slate-950 px-4 py-3 font-black text-white">{t.logout}</button>
+            <button onClick={goHome} className="rounded-2xl bg-slate-100 px-3 py-3 text-sm font-black sm:px-4 sm:text-base">{t.home}</button>
+            <button onClick={openMaterials} className="rounded-2xl bg-slate-100 px-3 py-3 text-sm font-black sm:px-4 sm:text-base">{t.materials}</button>
+            <button onClick={logout} className="col-span-2 rounded-2xl bg-slate-950 px-3 py-3 text-sm font-black text-white sm:col-span-1 sm:px-4 sm:text-base">{t.logout}</button>
           </>
         ) : (
           <>
-            <button onClick={login} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">{t.login}</button>
-            <button onClick={register} className="rounded-2xl bg-lime-500 px-4 py-3 font-black text-white">{t.register}</button>
+            <button onClick={login} className="rounded-2xl bg-slate-100 px-3 py-3 text-sm font-black sm:px-4 sm:text-base">{t.login}</button>
+            <button onClick={register} className="rounded-2xl bg-lime-500 px-3 py-3 text-sm font-black text-white sm:px-4 sm:text-base">{t.register}</button>
           </>
         )}
       </div>
@@ -2993,18 +2993,18 @@ function Header({
 
 function LessonCard({ title, description, status, active, completed, button, onClick }: { title: string; description: string; status: string; active: boolean; completed: boolean; button: string; onClick: () => void }) {
   return (
-    <article className={`rounded-[2rem] p-6 shadow-sm ${active ? "bg-white" : "bg-white/60"}`}>
+    <article className={`rounded-[2rem] p-4 shadow-sm sm:p-6 ${active ? "bg-white" : "bg-white/60"}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className={`font-black ${completed ? "text-sky-600" : active ? "text-lime-700" : "text-slate-400"}`}>{status}</p>
-          <h2 className="mt-2 text-3xl font-black">{title}</h2>
+          <h2 className="mt-2 text-2xl sm:text-3xl font-black">{title}</h2>
           <p className="mt-3 text-slate-600">{description}</p>
         </div>
-        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black ${completed ? "bg-sky-100 text-sky-700" : active ? "bg-lime-100 text-lime-700" : "bg-slate-100 text-slate-400"}`}>
+        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-xl sm:text-2xl font-black ${completed ? "bg-sky-100 text-sky-700" : active ? "bg-lime-100 text-lime-700" : "bg-slate-100 text-slate-400"}`}>
           {completed ? "✓" : active ? "▶" : "🔒"}
         </div>
       </div>
-      <button onClick={onClick} disabled={!active} className={`mt-6 w-full rounded-2xl py-4 text-lg font-black ${active ? "bg-lime-500 text-white shadow-[0_5px_0_#65a30d]" : "bg-slate-200 text-slate-500"}`}>
+      <button onClick={onClick} disabled={!active} className={`mt-6 w-full rounded-2xl py-4 text-base sm:text-lg font-black ${active ? "bg-lime-500 text-white shadow-[0_5px_0_#65a30d]" : "bg-slate-200 text-slate-500"}`}>
         {button}
       </button>
     </article>
@@ -3016,13 +3016,13 @@ function DemoCard({ t }: { t: typeof tr.ru }) {
     <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl">
       <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
         <p className="font-black text-lime-300">{t.chooseTranslation}</p>
-        <div className="mt-5 rounded-3xl bg-white p-6 text-slate-950">
+        <div className="mt-5 rounded-3xl bg-white p-4 sm:p-6 text-slate-950">
           <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Русское слово</p>
-          <p className="mt-2 text-5xl font-black">вода</p>
+          <p className="mt-2 text-3xl sm:text-5xl font-black">вода</p>
         </div>
         <div className="mt-4 grid gap-3">
           {["вада", "зямля", "воўк"].map((word) => (
-            <button key={word} onClick={() => speak(word)} className="rounded-2xl bg-white/10 px-5 py-4 text-left text-lg font-black hover:bg-lime-400 hover:text-slate-950">
+            <button key={word} onClick={() => speak(word)} className="rounded-2xl bg-white/10 px-5 py-4 text-left text-base sm:text-lg font-black hover:bg-lime-400 hover:text-slate-950">
               {word} <span className="float-right">🔊</span>
             </button>
           ))}
