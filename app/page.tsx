@@ -1,6 +1,4 @@
-from pathlib import Path
-
-code = r'''"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { initializeApp, getApps } from "firebase/app";
@@ -1026,8 +1024,3 @@ function LanguageSwitch({
     </div>
   );
 }
-'''
-
-path = Path("/mnt/data/page-tsx-duolingo-tasks-audio-firebase.txt")
-path.write_text(code, encoding="utf-8")
-print(f"Created {path}")
