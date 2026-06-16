@@ -20,7 +20,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.12.0-module-2-family";
+const APP_VERSION = "v0.13.0-notes-dictionary";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -37,7 +37,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 type Lang = "ru" | "be";
-type Screen = "landing" | "auth" | "home" | "lesson" | "words";
+type Screen = "landing" | "auth" | "home" | "lesson" | "words" | "notes" | "dictionary";
 type AuthMode = "login" | "register";
 type TaskType = "theory" | "translate" | "audio" | "trueFalse" | "fill" | "build" | "finish";
 
@@ -835,6 +835,237 @@ const lessons: Lesson[] = [
 
 const allWords: Word[] = lessons.flatMap((lesson) => lesson.words);
 
+const grammarNotes = [
+  {
+    module: "Модуль 1",
+    titleRu: "Как составлять простое предложение",
+    titleBe: "Як складаць просты сказ",
+    ruleRu:
+      "Самая простая схема: кто + что. Например: Я студэнт. Ён праграміст. Гэта сям'я.",
+    ruleBe:
+      "Самая простая схема: хто + што. Напрыклад: Я студэнт. Ён праграміст. Гэта сям'я.",
+    examples: [
+      { be: "Я студэнт", ru: "Я студент" },
+      { be: "Ён праграміст", ru: "Он программист" },
+      { be: "Гэта сям'я", ru: "Это семья" },
+    ],
+  },
+  {
+    module: "Модуль 1",
+    titleRu: "Предлог «з»",
+    titleBe: "Прыназоўнік «з»",
+    ruleRu:
+      "Предлог «з» означает «из» или «с». Шаблон: Я + з + место. После «з» страна часто меняет окончание.",
+    ruleBe:
+      "Прыназоўнік «з» азначае «из» або «с». Шаблон: Я + з + месца. Пасля «з» краіна часта змяняе канчатак.",
+    examples: [
+      { be: "Я з Беларусі", ru: "Я из Беларуси" },
+      { be: "Я з Расіі", ru: "Я из России" },
+      { be: "Я з Польшчы", ru: "Я из Польши" },
+      { be: "Я з Германіі", ru: "Я из Германии" },
+    ],
+  },
+  {
+    module: "Модуль 1",
+    titleRu: "Вопросительные слова",
+    titleBe: "Пытальныя словы",
+    ruleRu:
+      "Вопрос часто строится просто: вопросительное слово + остальная фраза.",
+    ruleBe:
+      "Пытанне часта будуецца проста: пытальнае слова + астатняя фраза.",
+    examples: [
+      { be: "Хто ты?", ru: "Кто ты?" },
+      { be: "Адкуль ты?", ru: "Откуда ты?" },
+      { be: "Як справы?", ru: "Как дела?" },
+    ],
+  },
+  {
+    module: "Модуль 2",
+    titleRu: "У мяне ёсць",
+    titleBe: "У мяне ёсць",
+    ruleRu:
+      "Фраза «У мяне ёсць» означает «У меня есть». После неё можно назвать человека или предмет.",
+    ruleBe:
+      "Фраза «У мяне ёсць» азначае «У меня есть». Пасля яе можна назваць чалавека або прадмет.",
+    examples: [
+      { be: "У мяне ёсць брат", ru: "У меня есть брат" },
+      { be: "У мяне ёсць сястра", ru: "У меня есть сестра" },
+      { be: "У мяне ёсць сям'я", ru: "У меня есть семья" },
+    ],
+  },
+  {
+    module: "Модуль 2",
+    titleRu: "Мой, мая, маё",
+    titleBe: "Мой, мая, маё",
+    ruleRu:
+      "Пока не учим род глубоко. Просто запоминаем готовые пары: мой брат, мая сястра, маё дзіця.",
+    ruleBe:
+      "Пакуль не вучым род глыбока. Проста запамінаем пары: мой брат, мая сястра, маё дзіця.",
+    examples: [
+      { be: "мой брат", ru: "мой брат" },
+      { be: "мая сястра", ru: "моя сестра" },
+      { be: "маё дзіця", ru: "мой ребёнок" },
+    ],
+  },
+  {
+    module: "Модуль 2",
+    titleRu: "Как описывать человека",
+    titleBe: "Як апісваць чалавека",
+    ruleRu:
+      "Схема: кто + какой. Например: Мой брат добры. Мая сястра разумная.",
+    ruleBe:
+      "Схема: хто + які. Напрыклад: Мой брат добры. Мая сястра разумная.",
+    examples: [
+      { be: "Мой брат добры", ru: "Мой брат добрый" },
+      { be: "Мая сястра разумная", ru: "Моя сестра умная" },
+      { be: "Дзядуля вясёлы", ru: "Дедушка весёлый" },
+    ],
+  },
+  {
+    module: "Модуль 2",
+    titleRu: "Сколько людей в семье",
+    titleBe: "Колькі людзей у сям'і",
+    ruleRu:
+      "Можно сказать длинно: У маёй сям'і тры чалавекі. Или коротко: Нас трое / Нас чацвёра.",
+    ruleBe:
+      "Можна сказаць доўга: У маёй сям'і тры чалавекі. Або каротка: Нас трое / Нас чацвёра.",
+    examples: [
+      { be: "У маёй сям'і тры чалавекі", ru: "В моей семье три человека" },
+      { be: "Нас трое", ru: "Нас трое" },
+      { be: "Нас чацвёра", ru: "Нас четверо" },
+    ],
+  },
+];
+
+const dictionarySections = [
+  {
+    titleRu: "Модуль 1 · Приветствия",
+    titleBe: "Модуль 1 · Вітанні",
+    words: [
+      { be: "Добры дзень", ru: "Добрый день" },
+      { be: "Добрай раніцы", ru: "Доброе утро" },
+      { be: "Добры вечар", ru: "Добрый вечер" },
+      { be: "Прывітанне", ru: "Привет" },
+      { be: "Да пабачэння", ru: "До свидания" },
+      { be: "Бывай", ru: "Пока" },
+      { be: "Як справы?", ru: "Как дела?" },
+      { be: "Дзякуй", ru: "Спасибо" },
+      { be: "Калі ласка", ru: "Пожалуйста" },
+    ],
+  },
+  {
+    titleRu: "Модуль 1 · Местоимения и вопросы",
+    titleBe: "Модуль 1 · Займеннікі і пытанні",
+    words: [
+      { be: "Я", ru: "Я" },
+      { be: "Ты", ru: "Ты" },
+      { be: "Ён", ru: "Он" },
+      { be: "Яна", ru: "Она" },
+      { be: "Мы", ru: "Мы" },
+      { be: "Вы", ru: "Вы" },
+      { be: "Яны", ru: "Они" },
+      { be: "хто", ru: "кто" },
+      { be: "што", ru: "что" },
+      { be: "дзе", ru: "где" },
+      { be: "адкуль", ru: "откуда" },
+      { be: "як", ru: "как" },
+    ],
+  },
+  {
+    titleRu: "Модуль 1 · Страны",
+    titleBe: "Модуль 1 · Краіны",
+    words: [
+      { be: "Беларусь", ru: "Беларусь" },
+      { be: "Расія", ru: "Россия" },
+      { be: "Польшча", ru: "Польша" },
+      { be: "Сербія", ru: "Сербия" },
+      { be: "Германія", ru: "Германия" },
+      { be: "Японія", ru: "Япония" },
+      { be: "Грэцыя", ru: "Греция" },
+      { be: "Амерыка", ru: "Америка" },
+      { be: "Канада", ru: "Канада" },
+    ],
+  },
+  {
+    titleRu: "Модуль 1 · Профессии и действия",
+    titleBe: "Модуль 1 · Прафесіі і дзеянні",
+    words: [
+      { be: "настаўнік", ru: "учитель" },
+      { be: "лекар", ru: "врач" },
+      { be: "інжынер", ru: "инженер" },
+      { be: "праграміст", ru: "программист" },
+      { be: "студэнт", ru: "студент" },
+      { be: "быць", ru: "быть" },
+      { be: "жыць", ru: "жить" },
+      { be: "працаваць", ru: "работать" },
+      { be: "вучыцца", ru: "учиться" },
+      { be: "чытаць", ru: "читать" },
+    ],
+  },
+  {
+    titleRu: "Модуль 2 · Семья",
+    titleBe: "Модуль 2 · Сям'я",
+    words: [
+      { be: "сям'я", ru: "семья" },
+      { be: "маці", ru: "мать" },
+      { be: "мама", ru: "мама" },
+      { be: "бацька", ru: "отец" },
+      { be: "тата", ru: "папа" },
+      { be: "брат", ru: "брат" },
+      { be: "сястра", ru: "сестра" },
+      { be: "сын", ru: "сын" },
+      { be: "дачка", ru: "дочь" },
+      { be: "бабуля", ru: "бабушка" },
+      { be: "дзядуля", ru: "дедушка" },
+    ],
+  },
+  {
+    titleRu: "Модуль 2 · Люди",
+    titleBe: "Модуль 2 · Людзі",
+    words: [
+      { be: "мужчына", ru: "мужчина" },
+      { be: "жанчына", ru: "женщина" },
+      { be: "хлопец", ru: "парень" },
+      { be: "дзяўчына", ru: "девушка" },
+      { be: "дзіця", ru: "ребёнок" },
+      { be: "чалавек", ru: "человек" },
+      { be: "людзі", ru: "люди" },
+    ],
+  },
+  {
+    titleRu: "Модуль 2 · Описание человека",
+    titleBe: "Модуль 2 · Апісанне чалавека",
+    words: [
+      { be: "добры", ru: "добрый" },
+      { be: "разумны", ru: "умный" },
+      { be: "вясёлы", ru: "весёлый" },
+      { be: "прыгожы", ru: "красивый" },
+      { be: "малады", ru: "молодой" },
+      { be: "стары", ru: "старый" },
+      { be: "мой", ru: "мой" },
+      { be: "мая", ru: "моя" },
+      { be: "маё", ru: "моё" },
+      { be: "мае", ru: "мои" },
+    ],
+  },
+  {
+    titleRu: "Модуль 2 · Числа",
+    titleBe: "Модуль 2 · Лікі",
+    words: [
+      { be: "адзін", ru: "один" },
+      { be: "два", ru: "два" },
+      { be: "тры", ru: "три" },
+      { be: "чатыры", ru: "четыре" },
+      { be: "пяць", ru: "пять" },
+      { be: "шэсць", ru: "шесть" },
+      { be: "сем", ru: "семь" },
+      { be: "восем", ru: "восемь" },
+      { be: "дзевяць", ru: "девять" },
+      { be: "дзесяць", ru: "десять" },
+    ],
+  },
+];
+
 const tr = {
   ru: {
     login: "Войти",
@@ -861,6 +1092,8 @@ const tr = {
     course: "Курс A1",
     courseGoal: "Цель: научиться читать, здороваться, представляться и понимать базовую речь.",
     wordsMode: "Учить слова",
+    notes: "Напоминания",
+    dictionary: "Словарь",
     lessonMap: "Карта уроков",
     open: "Доступно",
     locked: "Закрыто",
@@ -918,6 +1151,8 @@ const tr = {
     course: "Курс A1",
     courseGoal: "Мэта: навучыцца чытаць, вітацца, прадстаўляцца і разумець базавую гаворку.",
     wordsMode: "Вучыць словы",
+    notes: "Напаміны",
+    dictionary: "Слоўнік",
     lessonMap: "Мапа ўрокаў",
     open: "Даступна",
     locked: "Закрыта",
@@ -1521,6 +1756,18 @@ export default function Home() {
               >
                 {t.wordsMode}
               </button>
+              <button
+                onClick={() => setScreen("notes")}
+                className="mt-3 w-full rounded-2xl bg-white/10 py-4 font-black text-white"
+              >
+                📚 {t.notes}
+              </button>
+              <button
+                onClick={() => setScreen("dictionary")}
+                className="mt-3 w-full rounded-2xl bg-white/10 py-4 font-black text-white"
+              >
+                📖 {t.dictionary}
+              </button>
             </div>
           </aside>
 
@@ -1596,6 +1843,15 @@ export default function Home() {
             </div>
           </section>
         </section>
+      )}
+
+
+      {screen === "notes" && (
+        <NotesScreen t={t} lang={lang} back={() => setScreen("home")} />
+      )}
+
+      {screen === "dictionary" && (
+        <DictionaryScreen t={t} lang={lang} back={() => setScreen("home")} />
       )}
 
       {screen === "lesson" && (
@@ -1907,6 +2163,91 @@ function OptionGrid({ options, answer, correct, choose, audio = false }: { optio
         </button>
       ))}
     </div>
+  );
+}
+
+function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
+  return (
+    <section className="mx-auto max-w-5xl px-5 py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+        ← {t.back}
+      </button>
+
+      <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
+        <p className="font-black uppercase tracking-[0.2em] text-lime-300">Grammar notes</p>
+        <h1 className="mt-2 text-5xl font-black">{t.notes}</h1>
+        <p className="mt-4 max-w-2xl text-lg font-bold text-slate-300">
+          {lang === "ru"
+            ? "Короткие правила и шаблоны, чтобы быстро вспомнить, как строить предложения."
+            : "Кароткія правілы і шаблоны, каб хутка ўспомніць, як будаваць сказы."}
+        </p>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        {grammarNotes.map((note) => (
+          <article key={`${note.module}-${note.titleRu}`} className="rounded-[2rem] bg-white p-6 shadow-sm">
+            <p className="font-black uppercase tracking-[0.18em] text-lime-700">{note.module}</p>
+            <h2 className="mt-2 text-3xl font-black">{lang === "ru" ? note.titleRu : note.titleBe}</h2>
+            <p className="mt-4 text-lg font-bold leading-8 text-slate-600">
+              {lang === "ru" ? note.ruleRu : note.ruleBe}
+            </p>
+
+            <div className="mt-5 grid gap-3">
+              {note.examples.map((example) => (
+                <button
+                  key={`${example.be}-${example.ru}`}
+                  onClick={() => speak(example.be)}
+                  className="rounded-2xl bg-slate-50 p-4 text-left font-black"
+                >
+                  <span className="text-xl">{getDisplayBe(example.be)} 🔊</span>
+                  <span className="mt-1 block text-slate-500">{example.ru}</span>
+                </button>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DictionaryScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
+  return (
+    <section className="mx-auto max-w-5xl px-5 py-8">
+      <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
+        ← {t.back}
+      </button>
+
+      <div className="rounded-[2rem] bg-white p-6 shadow-xl">
+        <p className="font-black uppercase tracking-[0.2em] text-lime-700">Vocabulary</p>
+        <h1 className="mt-2 text-5xl font-black">{t.dictionary}</h1>
+        <p className="mt-4 max-w-2xl text-lg font-bold text-slate-600">
+          {lang === "ru"
+            ? "Все изученные слова по разделам. Нажимай на белорусское слово, чтобы услышать произношение."
+            : "Усе вывучаныя словы па раздзелах. Націскай на беларускае слова, каб пачуць вымаўленне."}
+        </p>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        {dictionarySections.map((section) => (
+          <article key={section.titleRu} className="rounded-[2rem] bg-white p-6 shadow-sm">
+            <h2 className="text-3xl font-black">{lang === "ru" ? section.titleRu : section.titleBe}</h2>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              {section.words.map((word) => (
+                <button
+                  key={`${section.titleRu}-${word.be}-${word.ru}`}
+                  onClick={() => speak(word.be)}
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3 text-left"
+                >
+                  <span className="font-black">{getDisplayBe(word.be)}</span>
+                  <span className="font-bold text-slate-500">{word.ru} 🔊</span>
+                </button>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
