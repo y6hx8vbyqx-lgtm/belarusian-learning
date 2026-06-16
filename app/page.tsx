@@ -593,6 +593,10 @@ export default function Home() {
         </section>
       )}
 
+      <div className="fixed bottom-2 right-3 z-50 rounded-full bg-slate-950/70 px-3 py-1 text-[11px] font-bold text-white/70">
+        v0.4.1-dashboard-tasks-firebase
+      </div>
+
       <LanguageSwitch language={language} setLanguage={setSiteLanguage} t={t} />
     </main>
   );
