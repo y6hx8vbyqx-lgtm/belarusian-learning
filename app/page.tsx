@@ -21,7 +21,7 @@ import {
 } from "firebase/firestore";
 
 type Language = "ru" | "be";
-type Screen = "landing" | "auth" | "dashboard" | "words";
+type Screen = "landing" | "auth" | "dashboard" | "lesson";
 type AuthMode = "login" | "register";
 
 type Profile = {
@@ -31,6 +31,14 @@ type Profile = {
   streak: number;
   openedCourse: number;
   registeredAtText: string;
+};
+
+type Word = {
+  ru: string;
+  be: string;
+  wrongBe: string[];
+  wrongRu: string[];
+  example: string;
 };
 
 const firebaseConfig = {
@@ -49,19 +57,19 @@ const db = getFirestore(app);
 
 const LANGUAGE_KEY = "belarusian-learning-language";
 
-const words = [
-  { ru: "вода", be: "вада", wrong: ["зямля", "воўк"], example: "Я п'ю ваду." },
-  { ru: "земля", be: "зямля", wrong: ["людзі", "вада"], example: "Гэта мая зямля." },
-  { ru: "люди", be: "людзі", wrong: ["дом", "дзень"], example: "Людзі ідуць дадому." },
-  { ru: "волк", be: "воўк", wrong: ["сын", "хлеб"], example: "Воўк жыве ў лесе." },
-  { ru: "дом", be: "дом", wrong: ["кніга", "горад"], example: "Гэта мой дом." },
-  { ru: "книга", be: "кніга", wrong: ["сястра", "вада"], example: "Я чытаю кнігу." },
-  { ru: "город", be: "горад", wrong: ["бацька", "малако"], example: "Мінск — вялікі горад." },
-  { ru: "день", be: "дзень", wrong: ["ноч", "зямля"], example: "Добры дзень!" },
-  { ru: "мать", be: "маці", wrong: ["бацька", "брат"], example: "Мая маці дома." },
-  { ru: "отец", be: "бацька", wrong: ["сястра", "маці"], example: "Мой бацька працуе." },
-  { ru: "брат", be: "брат", wrong: ["сястра", "дачка"], example: "Мой брат вучыцца." },
-  { ru: "сестра", be: "сястра", wrong: ["бацька", "сын"], example: "Мая сястра чытае." },
+const words: Word[] = [
+  { ru: "вода", be: "вада", wrongBe: ["зямля", "воўк"], wrongRu: ["земля", "волк"], example: "Я п'ю ваду." },
+  { ru: "земля", be: "зямля", wrongBe: ["людзі", "вада"], wrongRu: ["люди", "вода"], example: "Гэта мая зямля." },
+  { ru: "люди", be: "людзі", wrongBe: ["дом", "дзень"], wrongRu: ["дом", "день"], example: "Людзі ідуць дадому." },
+  { ru: "волк", be: "воўк", wrongBe: ["сын", "хлеб"], wrongRu: ["сын", "хлеб"], example: "Воўк жыве ў лесе." },
+  { ru: "дом", be: "дом", wrongBe: ["кніга", "горад"], wrongRu: ["книга", "город"], example: "Гэта мой дом." },
+  { ru: "книга", be: "кніга", wrongBe: ["сястра", "вада"], wrongRu: ["сестра", "вода"], example: "Я чытаю кнігу." },
+  { ru: "город", be: "горад", wrongBe: ["бацька", "малако"], wrongRu: ["отец", "молоко"], example: "Мінск — вялікі горад." },
+  { ru: "день", be: "дзень", wrongBe: ["ноч", "зямля"], wrongRu: ["ночь", "земля"], example: "Добры дзень!" },
+  { ru: "мать", be: "маці", wrongBe: ["бацька", "брат"], wrongRu: ["отец", "брат"], example: "Мая маці дома." },
+  { ru: "отец", be: "бацька", wrongBe: ["сястра", "маці"], wrongRu: ["сестра", "мать"], example: "Мой бацька працуе." },
+  { ru: "брат", be: "брат", wrongBe: ["сястра", "дачка"], wrongRu: ["сестра", "дочь"], example: "Мой брат вучыцца." },
+  { ru: "сестра", be: "сястра", wrongBe: ["бацька", "сын"], wrongRu: ["отец", "сын"], example: "Мая сястра чытае." },
 ];
 
 const text = {
@@ -69,130 +77,120 @@ const text = {
     login: "Войти",
     register: "Зарегистрироваться",
     logout: "Выйти",
-    heroBadge: "A1 для русскоязычных · без смешения русского и белорусского",
-    heroTitle: "Учим белорусский как игру, а не как скучный учебник.",
-    heroText:
-      "Слова, короткие уроки, тесты и прогресс. Сначала базовые слова, затем открываются новые курсы.",
-    start: "Начать обучение",
-    seeCourse: "Посмотреть курс",
+    heroTitle: "Белорусский для русскоязычных",
+    heroText: "Учи слова, проходи задания, открывай курсы и не смешивай русский с белорусским.",
+    start: "Начать",
+    dashboard: "Главная",
+    profile: "Профиль",
+    registeredAt: "Дата регистрации",
     learned: "слов изучено",
+    completedLessons: "уроков пройдено",
+    streak: "серия дней",
     opened: "курс открыт",
-    level: "начальный уровень",
     authTitle: "Вход или регистрация",
     email: "Email",
     password: "Пароль",
     createAccount: "Создать аккаунт",
-    enterAccount: "Войти в аккаунт",
-    noAccount: "Нет аккаунта? Зарегистрируйся.",
-    hasAccount: "Уже есть аккаунт? Войди.",
+    enterAccount: "Войти",
+    hasAccount: "Уже есть аккаунт? Войти",
+    noAccount: "Нет аккаунта? Зарегистрироваться",
     resetPassword: "Сбросить пароль",
-    dashboard: "Главная",
-    profile: "Профиль",
-    registeredAt: "Дата регистрации",
-    completedLessons: "Пройдено уроков",
-    streak: "Серия дней",
-    learnWords: "Учить слова",
-    course1: "Курс 1",
-    course2: "Курс 2",
-    locked: "Закрыто",
+    resetSent: "Письмо для сброса пароля отправлено",
+    courseMap: "Карта курса",
+    course1: "Курс 1: Основы",
+    course2: "Курс 2: Семья и время",
+    course3: "Курс 3: Разговоры",
     available: "Доступно",
-    course1Title: "Основы белорусского",
-    course1Text: "Алфавит, произношение, первые слова и простые фразы.",
-    course2Title: "Семья, числа и время",
-    course2Text: "Откроется после изучения 100 базовых слов.",
+    locked: "Закрыто",
+    lesson1: "Урок 1",
+    lessonWords: "Базовые слова",
+    lessonPronunciation: "Произношение",
+    lessonPhrases: "Фразы",
+    startLesson: "Начать урок",
     chooseTranslation: "Выбери перевод",
     chooseAudio: "Что ты услышал?",
     trueFalse: "Верно или неверно?",
-    finishPhrase: "Выбери пропущенное слово",
-    russianWord: "Русское слово",
+    fillBlank: "Выбери пропущенное слово",
+    ruWord: "Русское слово",
     listen: "Слушать",
     correct: "Правильно!",
     wrong: "Не совсем. Правильный ответ:",
     next: "Дальше",
     back: "Назад",
-    language: "Язык сайта",
-    loading: "Загрузка...",
-    needLogin: "Чтобы учить слова, сначала войди или зарегистрируйся.",
-    resetSent: "Письмо для сброса пароля отправлено.",
+    language: "Язык",
     true: "Верно",
     false: "Неверно",
+    loading: "Загрузка...",
   },
   be: {
     login: "Увайсці",
     register: "Зарэгістравацца",
     logout: "Выйсці",
-    heroBadge: "A1 для рускамоўных · без змешвання рускай і беларускай",
-    heroTitle: "Вучым беларускую як гульню, а не як сумны падручнік.",
-    heroText:
-      "Словы, кароткія ўрокі, тэсты і прагрэс. Спачатку базавыя словы, потым адкрываюцца новыя курсы.",
-    start: "Пачаць навучанне",
-    seeCourse: "Паглядзець курс",
+    heroTitle: "Беларуская для рускамоўных",
+    heroText: "Вучы словы, праходзь заданні, адкрывай курсы і не змешвай рускую з беларускай.",
+    start: "Пачаць",
+    dashboard: "Галоўная",
+    profile: "Профіль",
+    registeredAt: "Дата рэгістрацыі",
     learned: "слоў вывучана",
+    completedLessons: "урокаў пройдзена",
+    streak: "серыя дзён",
     opened: "курс адкрыты",
-    level: "пачатковы ўзровень",
     authTitle: "Уваход або рэгістрацыя",
     email: "Email",
     password: "Пароль",
     createAccount: "Стварыць акаўнт",
-    enterAccount: "Увайсці ў акаўнт",
-    noAccount: "Няма акаўнта? Зарэгіструйся.",
-    hasAccount: "Ужо ёсць акаўнт? Увайдзі.",
+    enterAccount: "Увайсці",
+    hasAccount: "Ужо ёсць акаўнт? Увайсці",
+    noAccount: "Няма акаўнта? Зарэгістравацца",
     resetPassword: "Скінуць пароль",
-    dashboard: "Галоўная",
-    profile: "Профіль",
-    registeredAt: "Дата рэгістрацыі",
-    completedLessons: "Пройдзена ўрокаў",
-    streak: "Серыя дзён",
-    learnWords: "Вучыць словы",
-    course1: "Курс 1",
-    course2: "Курс 2",
-    locked: "Закрыта",
+    resetSent: "Ліст для скіду пароля адпраўлены",
+    courseMap: "Мапа курса",
+    course1: "Курс 1: Асновы",
+    course2: "Курс 2: Сям'я і час",
+    course3: "Курс 3: Размовы",
     available: "Даступна",
-    course1Title: "Асновы беларускай",
-    course1Text: "Алфавіт, вымаўленне, першыя словы і простыя фразы.",
-    course2Title: "Сям'я, лічбы і час",
-    course2Text: "Адкрыецца пасля вывучэння 100 базавых слоў.",
+    locked: "Закрыта",
+    lesson1: "Урок 1",
+    lessonWords: "Базавыя словы",
+    lessonPronunciation: "Вымаўленне",
+    lessonPhrases: "Фразы",
+    startLesson: "Пачаць урок",
     chooseTranslation: "Выберы пераклад",
     chooseAudio: "Што ты пачуў?",
     trueFalse: "Правільна ці не?",
-    finishPhrase: "Выберы прапушчанае слова",
-    russianWord: "Рускае слова",
+    fillBlank: "Выберы прапушчанае слова",
+    ruWord: "Рускае слова",
     listen: "Слухаць",
     correct: "Правільна!",
     wrong: "Не зусім. Правільны адказ:",
     next: "Далей",
     back: "Назад",
-    language: "Мова сайта",
-    loading: "Загрузка...",
-    needLogin: "Каб вучыць словы, спачатку ўвайдзі або зарэгіструйся.",
-    resetSent: "Ліст для скіду пароля адпраўлены.",
+    language: "Мова",
     true: "Правільна",
     false: "Няправільна",
+    loading: "Загрузка...",
   },
 };
 
-function createEmptyProfile(firebaseUser: User): Profile {
+function speak(value: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const voice = new SpeechSynthesisUtterance(value);
+  voice.lang = "be-BY";
+  voice.rate = 0.85;
+  window.speechSynthesis.speak(voice);
+}
+
+function createProfile(user: User): Profile {
   return {
-    email: firebaseUser.email || "",
+    email: user.email || "",
     learnedWords: 0,
     completedLessons: 0,
     streak: 1,
     openedCourse: 1,
     registeredAtText: new Date().toLocaleDateString("ru-RU"),
   };
-}
-
-function speak(textToSpeak: string) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(textToSpeak);
-  utterance.lang = "be-BY";
-  utterance.rate = 0.85;
-  utterance.pitch = 1;
-
-  window.speechSynthesis.speak(utterance);
 }
 
 export default function Home() {
@@ -205,30 +203,26 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
+  const [taskIndex, setTaskIndex] = useState(0);
   const [answer, setAnswer] = useState<string | null>(null);
 
   const t = text[language];
-  const currentWord = words[wordIndex % words.length];
-  const taskType = wordIndex % 4;
+  const currentWord = words[taskIndex % words.length];
+  const taskType = taskIndex % 4;
 
-  const options = useMemo(() => {
-    return [currentWord.be, ...currentWord.wrong].sort(() => Math.random() - 0.5);
-  }, [currentWord]);
+  const beOptions = useMemo(
+    () => [currentWord.be, ...currentWord.wrongBe].sort(() => Math.random() - 0.5),
+    [currentWord]
+  );
 
-  const audioOptions = useMemo(() => {
-    return [currentWord.ru, ...currentWord.wrong.map((wrong) => {
-      const found = words.find((word) => word.be === wrong);
-      return found?.ru || wrong;
-    })].sort(() => Math.random() - 0.5);
-  }, [currentWord]);
+  const ruOptions = useMemo(
+    () => [currentWord.ru, ...currentWord.wrongRu].sort(() => Math.random() - 0.5),
+    [currentWord]
+  );
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem(LANGUAGE_KEY) as Language | null;
-
-    if (savedLanguage === "ru" || savedLanguage === "be") {
-      setLanguage(savedLanguage);
-    }
+    if (savedLanguage === "ru" || savedLanguage === "be") setLanguage(savedLanguage);
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
@@ -245,7 +239,7 @@ export default function Home() {
       if (snapshot.exists()) {
         setProfile(snapshot.data() as Profile);
       } else {
-        const newProfile = createEmptyProfile(user);
+        const newProfile = createProfile(user);
         await setDoc(userRef, {
           ...newProfile,
           createdAt: serverTimestamp(),
@@ -261,35 +255,33 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  function changeLanguage(nextLanguage: Language) {
-    setLanguage(nextLanguage);
-    localStorage.setItem(LANGUAGE_KEY, nextLanguage);
+  function setSiteLanguage(next: Language) {
+    setLanguage(next);
+    localStorage.setItem(LANGUAGE_KEY, next);
   }
 
   async function handleAuth() {
     setMessage("");
 
-    if (!email.trim() || !password.trim()) {
-      setMessage("Введите email и пароль.");
+    if (!email || !password) {
+      setMessage("Введите email и пароль");
       return;
     }
 
     if (password.length < 6) {
-      setMessage("Пароль должен быть минимум 6 символов.");
+      setMessage("Пароль должен быть минимум 6 символов");
       return;
     }
 
     try {
       if (mode === "register") {
         const result = await createUserWithEmailAndPassword(auth, email, password);
-        const newProfile = createEmptyProfile(result.user);
-
+        const newProfile = createProfile(result.user);
         await setDoc(doc(db, "users", result.user.uid), {
           ...newProfile,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
-
         setProfile(newProfile);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -299,232 +291,175 @@ export default function Home() {
       setPassword("");
       setScreen("dashboard");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Ошибка входа.");
+      setMessage(error instanceof Error ? error.message : "Ошибка");
     }
   }
 
-  async function handlePasswordReset() {
-    setMessage("");
-
-    if (!email.trim()) {
-      setMessage("Введите email, чтобы сбросить пароль.");
+  async function resetPassword() {
+    if (!email) {
+      setMessage("Введите email");
       return;
     }
 
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage(t.resetSent);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Ошибка сброса пароля.");
-    }
+    await sendPasswordResetEmail(auth, email);
+    setMessage(t.resetSent);
   }
 
   async function logout() {
     await signOut(auth);
-    setFirebaseUser(null);
-    setProfile(null);
     setScreen("landing");
   }
 
-  async function completeCorrectAnswer() {
+  async function markCorrect() {
     if (!firebaseUser || !profile) return;
 
-    const nextLearnedWords = Math.min(profile.learnedWords + 1, 100);
-    const updatedProfile: Profile = {
+    const learnedWords = Math.min(profile.learnedWords + 1, 100);
+    const updated = {
       ...profile,
-      learnedWords: nextLearnedWords,
-      completedLessons: nextLearnedWords >= 100 ? 1 : profile.completedLessons,
-      openedCourse: nextLearnedWords >= 100 ? 2 : 1,
+      learnedWords,
+      openedCourse: learnedWords >= 100 ? 2 : 1,
+      completedLessons: learnedWords >= 100 ? 1 : profile.completedLessons,
     };
 
-    setProfile(updatedProfile);
+    setProfile(updated);
 
     await updateDoc(doc(db, "users", firebaseUser.uid), {
-      learnedWords: updatedProfile.learnedWords,
-      completedLessons: updatedProfile.completedLessons,
-      openedCourse: updatedProfile.openedCourse,
+      learnedWords: updated.learnedWords,
+      openedCourse: updated.openedCourse,
+      completedLessons: updated.completedLessons,
       updatedAt: serverTimestamp(),
     });
   }
 
-  async function chooseAnswer(option: string, correctAnswer: string) {
-    if (!firebaseUser || !profile || answer) return;
-
+  async function choose(option: string, correct: string) {
+    if (answer) return;
     setAnswer(option);
 
-    if (option === correctAnswer) {
-      await completeCorrectAnswer();
+    if (option === correct) {
+      await markCorrect();
     }
   }
 
-  function nextWord() {
+  function nextTask() {
     setAnswer(null);
-    setWordIndex((current) => current + 1);
+    setTaskIndex((value) => value + 1);
   }
 
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f7f7ef]">
-        <p className="text-2xl font-black text-slate-700">{t.loading}</p>
+        <p className="text-2xl font-black">{t.loading}</p>
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-[#f7f7ef] pb-24 text-slate-950">
+      <Header
+        t={t}
+        user={firebaseUser}
+        goHome={() => setScreen(firebaseUser ? "dashboard" : "landing")}
+        login={() => {
+          setMode("login");
+          setScreen("auth");
+        }}
+        register={() => {
+          setMode("register");
+          setScreen("auth");
+        }}
+        logout={logout}
+      />
+
       {screen === "landing" && (
-        <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8">
-          <Header
-            t={t}
-            user={firebaseUser}
-            onLogin={() => {
-              setMode("login");
-              setScreen("auth");
-            }}
-            onRegister={() => {
-              setMode("register");
-              setScreen("auth");
-            }}
-            onDashboard={() => setScreen(firebaseUser ? "dashboard" : "landing")}
-            onLogout={logout}
-          />
-
-          <div className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <section className="space-y-7">
-              <div className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-lime-700 shadow-sm">
-                {t.heroBadge}
-              </div>
-
-              <div className="space-y-5">
-                <h1 className="max-w-3xl text-5xl font-black tracking-tight sm:text-7xl">
-                  {t.heroTitle}
-                </h1>
-                <p className="max-w-2xl text-lg leading-8 text-slate-600">
-                  {t.heroText}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  onClick={() => {
-                    setMode("register");
-                    setScreen("auth");
-                  }}
-                  className="rounded-2xl bg-lime-500 px-7 py-4 text-center text-lg font-black text-white shadow-[0_6px_0_#65a30d] transition hover:-translate-y-0.5"
-                >
-                  {t.start}
-                </button>
-                <button
-                  onClick={() => setScreen(firebaseUser ? "dashboard" : "auth")}
-                  className="rounded-2xl border-2 border-slate-200 bg-white px-7 py-4 text-center text-lg font-black text-slate-700 transition hover:bg-slate-50"
-                >
-                  {t.seeCourse}
-                </button>
-              </div>
-
-              <StatsCards t={t} profile={profile} />
-            </section>
-
-            <WordPreview t={t} />
+        <section className="mx-auto grid min-h-[80vh] max-w-6xl items-center gap-8 px-5 py-10 lg:grid-cols-2">
+          <div className="space-y-6">
+            <p className="inline-flex rounded-full bg-white px-4 py-2 font-black text-lime-700 shadow-sm">
+              A1 · Belarusian Learning
+            </p>
+            <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
+              {t.heroTitle}
+            </h1>
+            <p className="max-w-xl text-lg leading-8 text-slate-600">{t.heroText}</p>
+            <button
+              onClick={() => {
+                setMode("register");
+                setScreen("auth");
+              }}
+              className="rounded-2xl bg-lime-500 px-8 py-4 text-lg font-black text-white shadow-[0_6px_0_#65a30d]"
+            >
+              {t.start}
+            </button>
           </div>
+
+          <DemoCard t={t} />
         </section>
       )}
 
       {screen === "auth" && (
-        <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-6 sm:px-8">
-          <Header
-            t={t}
-            user={firebaseUser}
-            onLogin={() => setMode("login")}
-            onRegister={() => setMode("register")}
-            onDashboard={() => setScreen(firebaseUser ? "dashboard" : "landing")}
-            onLogout={logout}
-          />
+        <section className="mx-auto flex max-w-xl items-center justify-center px-5 py-12">
+          <div className="w-full rounded-[2rem] bg-white p-6 shadow-xl">
+            <h1 className="text-4xl font-black">{t.authTitle}</h1>
+            <div className="mt-6 space-y-3">
+              <input
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t.email}
+                type="email"
+                className="w-full rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+              />
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder={t.password}
+                type="password"
+                className="w-full rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+              />
 
-          <div className="flex flex-1 items-center justify-center py-10">
-            <div className="w-full rounded-[2rem] bg-white p-6 shadow-xl sm:p-8">
-              <p className="font-black uppercase tracking-[0.2em] text-lime-700">
-                Firebase Auth
-              </p>
-              <h1 className="mt-3 text-4xl font-black">{t.authTitle}</h1>
+              {message && (
+                <p className="rounded-2xl bg-amber-50 p-4 font-bold text-amber-800">
+                  {message}
+                </p>
+              )}
 
-              <div className="mt-6 space-y-4">
-                <input
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 font-bold outline-none focus:border-lime-400"
-                  placeholder={t.email}
-                  type="email"
-                />
-                <input
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 font-bold outline-none focus:border-lime-400"
-                  placeholder={t.password}
-                  type="password"
-                />
+              <button
+                onClick={handleAuth}
+                className="w-full rounded-2xl bg-lime-500 py-4 font-black text-white shadow-[0_5px_0_#65a30d]"
+              >
+                {mode === "register" ? t.createAccount : t.enterAccount}
+              </button>
 
-                {message && (
-                  <p className="rounded-2xl bg-amber-50 p-4 font-bold text-amber-800">
-                    {message}
-                  </p>
-                )}
-
+              {mode === "login" && (
                 <button
-                  onClick={handleAuth}
-                  className="w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
+                  onClick={resetPassword}
+                  className="w-full rounded-2xl bg-slate-100 py-4 font-black"
                 >
-                  {mode === "register" ? t.createAccount : t.enterAccount}
+                  {t.resetPassword}
                 </button>
+              )}
 
-                {mode === "login" && (
-                  <button
-                    onClick={handlePasswordReset}
-                    className="w-full rounded-2xl bg-slate-100 py-4 font-black text-slate-700"
-                  >
-                    {t.resetPassword}
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setMode(mode === "register" ? "login" : "register")}
-                  className="w-full rounded-2xl bg-slate-100 py-4 font-black text-slate-700"
-                >
-                  {mode === "register" ? t.hasAccount : t.noAccount}
-                </button>
-              </div>
+              <button
+                onClick={() => setMode(mode === "register" ? "login" : "register")}
+                className="w-full rounded-2xl bg-slate-100 py-4 font-black"
+              >
+                {mode === "register" ? t.hasAccount : t.noAccount}
+              </button>
             </div>
           </div>
         </section>
       )}
 
       {screen === "dashboard" && (
-        <section className="mx-auto min-h-screen w-full max-w-6xl px-5 py-6 sm:px-8">
-          <Header
-            t={t}
-            user={firebaseUser}
-            onLogin={() => {
-              setMode("login");
-              setScreen("auth");
-            }}
-            onRegister={() => {
-              setMode("register");
-              setScreen("auth");
-            }}
-            onDashboard={() => setScreen("dashboard")}
-            onLogout={logout}
-          />
-
-          <div className="grid gap-6 py-8 lg:grid-cols-[0.75fr_1.25fr]">
-            <aside className="rounded-[2rem] bg-white p-6 shadow-sm">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <aside className="space-y-5">
+            <div className="rounded-[2rem] bg-white p-6 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-lime-400 text-3xl font-black">
                   ў
                 </div>
                 <div>
                   <p className="font-black text-slate-400">{t.profile}</p>
-                  <h2 className="break-all text-2xl font-black">
-                    {profile?.email || firebaseUser?.email || "User"}
+                  <h2 className="break-all text-xl font-black">
+                    {profile?.email || firebaseUser?.email}
                   </h2>
                 </div>
               </div>
@@ -532,125 +467,112 @@ export default function Home() {
               <div className="mt-6 grid gap-3">
                 <InfoRow label={t.registeredAt} value={profile?.registeredAtText || "—"} />
                 <InfoRow label={t.learned} value={`${profile?.learnedWords || 0}/100`} />
-                <InfoRow
-                  label={t.completedLessons}
-                  value={`${profile?.completedLessons || 0}`}
-                />
+                <InfoRow label={t.completedLessons} value={`${profile?.completedLessons || 0}`} />
                 <InfoRow label={t.streak} value={`${profile?.streak || 0}`} />
               </div>
-            </aside>
+            </div>
 
-            <section className="space-y-5">
-              <div>
-                <p className="font-black uppercase tracking-[0.2em] text-lime-700">
-                  {t.dashboard}
-                </p>
-                <h1 className="text-5xl font-black">{t.course1Title}</h1>
-              </div>
+            <Stats profile={profile} t={t} />
+          </aside>
 
-              <StatsCards t={t} profile={profile} />
+          <section className="space-y-5">
+            <div>
+              <p className="font-black uppercase tracking-[0.2em] text-lime-700">
+                {t.courseMap}
+              </p>
+              <h1 className="text-5xl font-black">{t.dashboard}</h1>
+            </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <article className="rounded-[2rem] bg-white p-6 shadow-sm">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-lime-100 text-2xl font-black text-lime-700">
-                    1
-                  </div>
-                  <p className="font-black text-lime-700">{t.available}</p>
-                  <h2 className="mt-2 text-3xl font-black">{t.course1}</h2>
-                  <p className="mt-3 text-slate-600">{t.course1Text}</p>
-                  <button
-                    onClick={() => {
-                      if (!firebaseUser) {
-                        setMessage(t.needLogin);
-                        setMode("login");
-                        setScreen("auth");
-                        return;
-                      }
-
-                      setScreen("words");
-                    }}
-                    className="mt-6 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
-                  >
-                    {t.learnWords}
-                  </button>
-                </article>
-
-                <article className="rounded-[2rem] bg-white/70 p-6 shadow-sm">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl font-black text-slate-500">
-                    2
-                  </div>
-                  <p className="font-black text-slate-400">
-                    {profile && profile.openedCourse >= 2 ? t.available : t.locked}
-                  </p>
-                  <h2 className="mt-2 text-3xl font-black">{t.course2}</h2>
-                  <p className="mt-3 text-slate-600">{t.course2Text}</p>
-                  <button
-                    disabled={!profile || profile.openedCourse < 2}
-                    className="mt-6 w-full rounded-2xl bg-slate-200 py-4 text-lg font-black text-slate-500 disabled:cursor-not-allowed"
-                  >
-                    {profile && profile.openedCourse >= 2 ? t.start : t.locked}
-                  </button>
-                </article>
-              </div>
-            </section>
-          </div>
+            <div className="grid gap-4">
+              <CourseCard
+                title={t.course1}
+                description="Алфавіт, вада, зямля, людзі, воўк, дом, кніга."
+                status={t.available}
+                active
+                button={t.startLesson}
+                onClick={() => setScreen("lesson")}
+              />
+              <CourseCard
+                title={t.course2}
+                description={t.course2}
+                status={profile && profile.openedCourse >= 2 ? t.available : t.locked}
+                active={Boolean(profile && profile.openedCourse >= 2)}
+                button={profile && profile.openedCourse >= 2 ? t.startLesson : t.locked}
+                onClick={() => profile && profile.openedCourse >= 2 && setScreen("lesson")}
+              />
+              <CourseCard
+                title={t.course3}
+                description="Крама, кавярня, транспарт, горад."
+                status={t.locked}
+                active={false}
+                button={t.locked}
+                onClick={() => {}}
+              />
+            </div>
+          </section>
         </section>
       )}
 
-      {screen === "words" && (
-        <section className="mx-auto min-h-screen w-full max-w-3xl px-5 py-6 sm:px-8">
-          <Header
-            t={t}
-            user={firebaseUser}
-            onLogin={() => {
-              setMode("login");
-              setScreen("auth");
-            }}
-            onRegister={() => {
-              setMode("register");
-              setScreen("auth");
-            }}
-            onDashboard={() => setScreen("dashboard")}
-            onLogout={logout}
-          />
+      {screen === "lesson" && (
+        <section className="mx-auto max-w-3xl px-5 py-8">
+          <button
+            onClick={() => setScreen("dashboard")}
+            className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm"
+          >
+            ← {t.back}
+          </button>
 
-          <div className="py-8">
-            <button
-              onClick={() => setScreen("dashboard")}
-              className="mb-5 rounded-2xl bg-white px-5 py-3 font-black text-slate-700 shadow-sm"
-            >
-              ← {t.back}
-            </button>
-
-            <div className="rounded-[2rem] bg-slate-950 p-5 text-white shadow-xl">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-lime-300">
-                    {t.learnWords}
-                  </p>
-                  <h1 className="text-3xl font-black">
-                    {taskType === 0 && t.chooseTranslation}
-                    {taskType === 1 && t.chooseAudio}
-                    {taskType === 2 && t.trueFalse}
-                    {taskType === 3 && t.finishPhrase}
-                  </h1>
-                </div>
-                <span className="rounded-full bg-lime-400 px-3 py-1 text-sm font-black text-slate-950">
-                  {profile?.learnedWords || 0}/100
-                </span>
+          <div className="rounded-[2rem] bg-slate-950 p-5 text-white shadow-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-black text-lime-300">{t.lessonWords}</p>
+                <h1 className="text-3xl font-black">
+                  {taskType === 0 && t.chooseTranslation}
+                  {taskType === 1 && t.chooseAudio}
+                  {taskType === 2 && t.trueFalse}
+                  {taskType === 3 && t.fillBlank}
+                </h1>
               </div>
+              <span className="rounded-full bg-lime-400 px-3 py-1 text-sm font-black text-slate-950">
+                {profile?.learnedWords || 0}/100
+              </span>
+            </div>
 
-              <TaskCard
+            {taskType === 0 && (
+              <TranslationTask
                 t={t}
-                taskType={taskType}
-                currentWord={currentWord}
-                options={options}
-                audioOptions={audioOptions}
+                word={currentWord}
+                options={beOptions}
                 answer={answer}
-                chooseAnswer={chooseAnswer}
+                choose={choose}
               />
+            )}
 
-              {answer && (
+            {taskType === 1 && (
+              <AudioTask
+                t={t}
+                word={currentWord}
+                options={ruOptions}
+                answer={answer}
+                choose={choose}
+              />
+            )}
+
+            {taskType === 2 && (
+              <TrueFalseTask t={t} word={currentWord} answer={answer} choose={choose} />
+            )}
+
+            {taskType === 3 && (
+              <FillTask
+                word={currentWord}
+                options={beOptions}
+                answer={answer}
+                choose={choose}
+              />
+            )}
+
+            {answer && (
+              <>
                 <div className="mt-4 rounded-2xl bg-white p-4 font-black text-slate-950">
                   {answer === currentWord.be ||
                   answer === currentWord.ru ||
@@ -658,255 +580,232 @@ export default function Home() {
                     ? t.correct
                     : `${t.wrong} ${currentWord.be}`}
                 </div>
-              )}
 
-              {answer && (
                 <button
-                  onClick={nextWord}
+                  onClick={nextTask}
                   className="mt-4 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]"
                 >
                   {t.next}
                 </button>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </section>
       )}
 
-      <LanguageSwitch language={language} setLanguage={changeLanguage} t={t} />
+      <LanguageSwitch language={language} setLanguage={setSiteLanguage} t={t} />
     </main>
   );
 }
 
-function TaskCard({
+function TranslationTask({
   t,
-  taskType,
-  currentWord,
+  word,
   options,
-  audioOptions,
   answer,
-  chooseAnswer,
+  choose,
 }: {
   t: typeof text.ru;
-  taskType: number;
-  currentWord: (typeof words)[number];
+  word: Word;
   options: string[];
-  audioOptions: string[];
   answer: string | null;
-  chooseAnswer: (option: string, correctAnswer: string) => void;
+  choose: (option: string, correct: string) => void;
 }) {
-  if (taskType === 1) {
-    return (
-      <>
-        <div className="rounded-3xl bg-white p-6 text-slate-950">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-            Audio
-          </p>
-          <button
-            onClick={() => speak(currentWord.be)}
-            className="mt-3 rounded-2xl bg-lime-500 px-6 py-4 text-2xl font-black text-white shadow-[0_5px_0_#65a30d]"
-          >
-            🔊 {t.listen}
-          </button>
-        </div>
-
-        <div className="mt-4 grid gap-3">
-          {audioOptions.map((option) => (
-            <AnswerButton
-              key={option}
-              option={option}
-              answer={answer}
-              correctAnswer={currentWord.ru}
-              onClick={() => chooseAnswer(option, currentWord.ru)}
-            />
-          ))}
-        </div>
-      </>
-    );
-  }
-
-  if (taskType === 2) {
-    return (
-      <>
-        <button
-          onClick={() => speak(currentWord.be)}
-          className="w-full rounded-3xl bg-white p-6 text-left text-slate-950"
-        >
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-            Нажми на слово
-          </p>
-          <p className="mt-2 text-6xl font-black">{currentWord.be} 🔊</p>
-          <p className="mt-3 text-lg font-bold text-slate-500">
-            {currentWord.be} = {currentWord.ru}
-          </p>
-        </button>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            onClick={() => chooseAnswer("true", "true")}
-            disabled={Boolean(answer)}
-            className="rounded-2xl bg-lime-500 px-5 py-4 text-lg font-black text-white"
-          >
-            {t.true}
-          </button>
-          <button
-            onClick={() => chooseAnswer("false", "true")}
-            disabled={Boolean(answer)}
-            className="rounded-2xl bg-red-500 px-5 py-4 text-lg font-black text-white"
-          >
-            {t.false}
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (taskType === 3) {
-    return (
-      <>
-        <div className="rounded-3xl bg-white p-6 text-slate-950">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-            Прыклад
-          </p>
-          <p className="mt-2 text-3xl font-black">
-            {currentWord.example.replace(currentWord.be, "_____")}
-          </p>
-        </div>
-
-        <div className="mt-4 grid gap-3">
-          {options.map((option) => (
-            <AnswerButton
-              key={option}
-              option={option}
-              answer={answer}
-              correctAnswer={currentWord.be}
-              onClick={() => chooseAnswer(option, currentWord.be)}
-            />
-          ))}
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
       <div className="rounded-3xl bg-white p-6 text-slate-950">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-          {t.russianWord}
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+          {t.ruWord}
         </p>
-        <p className="mt-2 text-6xl font-black">{currentWord.ru}</p>
+        <p className="mt-2 text-6xl font-black">{word.ru}</p>
       </div>
+      <OptionGrid options={options} answer={answer} correct={word.be} choose={choose} audio />
+    </>
+  );
+}
 
-      <div className="mt-4 grid gap-3">
-        {options.map((option) => (
-          <button
-            key={option}
-            onClick={() => {
-              speak(option);
-              chooseAnswer(option, currentWord.be);
-            }}
-            disabled={Boolean(answer)}
-            className={`rounded-2xl border-2 px-5 py-4 text-left text-lg font-black transition ${
-              answer && option === currentWord.be
-                ? "border-lime-400 bg-lime-400 text-slate-950"
-                : answer === option
-                ? "border-red-400 bg-red-400 text-white"
-                : "border-white/10 bg-white/10 hover:bg-lime-400 hover:text-slate-950"
-            }`}
-          >
-            {option} <span className="float-right">🔊</span>
-          </button>
-        ))}
+function AudioTask({
+  t,
+  word,
+  options,
+  answer,
+  choose,
+}: {
+  t: typeof text.ru;
+  word: Word;
+  options: string[];
+  answer: string | null;
+  choose: (option: string, correct: string) => void;
+}) {
+  return (
+    <>
+      <div className="rounded-3xl bg-white p-6 text-slate-950">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Audio</p>
+        <button
+          onClick={() => speak(word.be)}
+          className="mt-3 rounded-2xl bg-lime-500 px-6 py-4 text-2xl font-black text-white shadow-[0_5px_0_#65a30d]"
+        >
+          🔊 {t.listen}
+        </button>
+      </div>
+      <OptionGrid options={options} answer={answer} correct={word.ru} choose={choose} />
+    </>
+  );
+}
+
+function TrueFalseTask({
+  t,
+  word,
+  answer,
+  choose,
+}: {
+  t: typeof text.ru;
+  word: Word;
+  answer: string | null;
+  choose: (option: string, correct: string) => void;
+}) {
+  return (
+    <>
+      <button
+        onClick={() => speak(word.be)}
+        className="w-full rounded-3xl bg-white p-6 text-left text-slate-950"
+      >
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+          Нажми на слово
+        </p>
+        <p className="mt-2 text-6xl font-black">{word.be} 🔊</p>
+        <p className="mt-3 text-xl font-black text-slate-500">
+          {word.be} = {word.ru}
+        </p>
+      </button>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <button
+          onClick={() => choose("true", "true")}
+          disabled={Boolean(answer)}
+          className="rounded-2xl bg-lime-500 px-5 py-4 text-lg font-black text-white"
+        >
+          {t.true}
+        </button>
+        <button
+          onClick={() => choose("false", "true")}
+          disabled={Boolean(answer)}
+          className="rounded-2xl bg-red-500 px-5 py-4 text-lg font-black text-white"
+        >
+          {t.false}
+        </button>
       </div>
     </>
   );
 }
 
-function AnswerButton({
-  option,
+function FillTask({
+  word,
+  options,
   answer,
-  correctAnswer,
-  onClick,
+  choose,
 }: {
-  option: string;
+  word: Word;
+  options: string[];
   answer: string | null;
-  correctAnswer: string;
-  onClick: () => void;
+  choose: (option: string, correct: string) => void;
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={Boolean(answer)}
-      className={`rounded-2xl border-2 px-5 py-4 text-left text-lg font-black transition ${
-        answer && option === correctAnswer
-          ? "border-lime-400 bg-lime-400 text-slate-950"
-          : answer === option
-          ? "border-red-400 bg-red-400 text-white"
-          : "border-white/10 bg-white/10 hover:bg-lime-400 hover:text-slate-950"
-      }`}
-    >
-      {option}
-    </button>
+    <>
+      <div className="rounded-3xl bg-white p-6 text-slate-950">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+          Прыклад
+        </p>
+        <p className="mt-2 text-3xl font-black">
+          {word.example.replace(word.be, "_____")}
+        </p>
+      </div>
+      <OptionGrid options={options} answer={answer} correct={word.be} choose={choose} audio />
+    </>
+  );
+}
+
+function OptionGrid({
+  options,
+  answer,
+  correct,
+  choose,
+  audio = false,
+}: {
+  options: string[];
+  answer: string | null;
+  correct: string;
+  choose: (option: string, correct: string) => void;
+  audio?: boolean;
+}) {
+  return (
+    <div className="mt-4 grid gap-3">
+      {options.map((option) => (
+        <button
+          key={option}
+          onClick={() => {
+            if (audio) speak(option);
+            choose(option, correct);
+          }}
+          disabled={Boolean(answer)}
+          className={`rounded-2xl border-2 px-5 py-4 text-left text-lg font-black transition ${
+            answer && option === correct
+              ? "border-lime-400 bg-lime-400 text-slate-950"
+              : answer === option
+              ? "border-red-400 bg-red-400 text-white"
+              : "border-white/10 bg-white/10 hover:bg-lime-400 hover:text-slate-950"
+          }`}
+        >
+          {option} {audio && <span className="float-right">🔊</span>}
+        </button>
+      ))}
+    </div>
   );
 }
 
 function Header({
   t,
   user,
-  onLogin,
-  onRegister,
-  onDashboard,
-  onLogout,
+  goHome,
+  login,
+  register,
+  logout,
 }: {
   t: typeof text.ru;
   user: User | null;
-  onLogin: () => void;
-  onRegister: () => void;
-  onDashboard: () => void;
-  onLogout: () => void;
+  goHome: () => void;
+  login: () => void;
+  register: () => void;
+  logout: () => void;
 }) {
   return (
-    <header className="flex items-center justify-between rounded-3xl border border-lime-200 bg-white/80 px-5 py-4 shadow-sm backdrop-blur">
-      <button onClick={onDashboard} className="flex items-center gap-3 text-left">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-400 text-2xl font-black shadow-sm">
+    <header className="sticky top-3 z-40 mx-auto mt-3 flex max-w-6xl items-center justify-between rounded-3xl border border-lime-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur">
+      <button onClick={goHome} className="flex items-center gap-3 text-left">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-400 text-2xl font-black">
           ў
         </div>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-lime-700">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-lime-700">
             Belarusian Learning
           </p>
-          <h1 className="text-xl font-black">Вывучай беларускую мову</h1>
+          <h1 className="text-lg font-black">Вывучай беларускую</h1>
         </div>
       </button>
-
-      <div className="hidden items-center gap-3 sm:flex">
+      <div className="flex gap-2">
         {user ? (
           <>
-            <button
-              onClick={onDashboard}
-              className="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
-            >
+            <button onClick={goHome} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">
               {t.dashboard}
             </button>
-            <button
-              onClick={onLogout}
-              className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white"
-            >
+            <button onClick={logout} className="rounded-2xl bg-slate-950 px-4 py-3 font-black text-white">
               {t.logout}
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={onLogin}
-              className="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
-            >
+            <button onClick={login} className="rounded-2xl bg-slate-100 px-4 py-3 font-black">
               {t.login}
             </button>
-            <button
-              onClick={onRegister}
-              className="rounded-2xl bg-lime-500 px-5 py-3 font-black text-white shadow-[0_5px_0_#65a30d] transition hover:-translate-y-0.5"
-            >
+            <button onClick={register} className="rounded-2xl bg-lime-500 px-4 py-3 font-black text-white">
               {t.register}
             </button>
           </>
@@ -916,63 +815,93 @@ function Header({
   );
 }
 
-function StatsCards({ t, profile }: { t: typeof text.ru; profile: Profile | null }) {
+function CourseCard({
+  title,
+  description,
+  status,
+  active,
+  button,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  status: string;
+  active: boolean;
+  button: string;
+  onClick: () => void;
+}) {
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      <div className="rounded-3xl bg-white p-5 shadow-sm">
-        <p className="text-3xl font-black text-lime-600">
-          {profile?.learnedWords || 0}
-        </p>
-        <p className="font-bold text-slate-500">{t.learned}</p>
+    <article className={`rounded-[2rem] p-6 shadow-sm ${active ? "bg-white" : "bg-white/60"}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className={`font-black ${active ? "text-lime-700" : "text-slate-400"}`}>
+            {status}
+          </p>
+          <h2 className="mt-2 text-3xl font-black">{title}</h2>
+          <p className="mt-3 text-slate-600">{description}</p>
+        </div>
+        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black ${active ? "bg-lime-100 text-lime-700" : "bg-slate-100 text-slate-400"}`}>
+          {active ? "✓" : "🔒"}
+        </div>
       </div>
-      <div className="rounded-3xl bg-white p-5 shadow-sm">
-        <p className="text-3xl font-black text-orange-500">
-          {profile?.openedCourse || 1}
-        </p>
-        <p className="font-bold text-slate-500">{t.opened}</p>
-      </div>
-      <div className="rounded-3xl bg-white p-5 shadow-sm">
-        <p className="text-3xl font-black text-sky-500">A1</p>
-        <p className="font-bold text-slate-500">{t.level}</p>
-      </div>
-    </div>
+      <button
+        onClick={onClick}
+        disabled={!active}
+        className={`mt-6 w-full rounded-2xl py-4 text-lg font-black ${
+          active
+            ? "bg-lime-500 text-white shadow-[0_5px_0_#65a30d]"
+            : "bg-slate-200 text-slate-500"
+        }`}
+      >
+        {button}
+      </button>
+    </article>
   );
 }
 
-function WordPreview({ t }: { t: typeof text.ru }) {
+function DemoCard({ t }: { t: typeof text.ru }) {
   return (
-    <aside className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl">
+    <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl">
       <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-lime-300">{t.learnWords}</p>
-            <h3 className="text-2xl font-black">{t.chooseTranslation}</h3>
-          </div>
-          <span className="rounded-full bg-lime-400 px-3 py-1 text-sm font-black text-slate-950">
-            1/100
-          </span>
-        </div>
-
-        <div className="rounded-3xl bg-white p-6 text-slate-950">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
-            {t.russianWord}
+        <p className="font-black text-lime-300">{t.chooseTranslation}</p>
+        <div className="mt-5 rounded-3xl bg-white p-6 text-slate-950">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+            {t.ruWord}
           </p>
           <p className="mt-2 text-5xl font-black">вода</p>
         </div>
-
         <div className="mt-4 grid gap-3">
           {["вада", "зямля", "воўк"].map((word) => (
             <button
               key={word}
               onClick={() => speak(word)}
-              className="rounded-2xl border-2 border-white/10 bg-white/10 px-5 py-4 text-left text-lg font-black transition hover:bg-lime-400 hover:text-slate-950"
+              className="rounded-2xl bg-white/10 px-5 py-4 text-left text-lg font-black hover:bg-lime-400 hover:text-slate-950"
             >
               {word} <span className="float-right">🔊</span>
             </button>
           ))}
         </div>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+function Stats({ profile, t }: { profile: Profile | null; t: typeof text.ru }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+      <Stat value={profile?.learnedWords || 0} label={t.learned} />
+      <Stat value={profile?.openedCourse || 1} label={t.opened} />
+      <Stat value="A1" label="Level" />
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div className="rounded-3xl bg-white p-5 shadow-sm">
+      <p className="text-3xl font-black text-lime-600">{value}</p>
+      <p className="font-bold text-slate-500">{label}</p>
+    </div>
   );
 }
 
@@ -1002,20 +931,16 @@ function LanguageSwitch({
         </span>
         <button
           onClick={() => setLanguage("ru")}
-          className={`rounded-full px-4 py-2 text-sm font-black transition ${
-            language === "ru"
-              ? "bg-lime-500 text-white"
-              : "bg-transparent text-slate-500"
+          className={`rounded-full px-4 py-2 text-sm font-black ${
+            language === "ru" ? "bg-lime-500 text-white" : "text-slate-500"
           }`}
         >
           RU
         </button>
         <button
           onClick={() => setLanguage("be")}
-          className={`rounded-full px-4 py-2 text-sm font-black transition ${
-            language === "be"
-              ? "bg-lime-500 text-white"
-              : "bg-transparent text-slate-500"
+          className={`rounded-full px-4 py-2 text-sm font-black ${
+            language === "be" ? "bg-lime-500 text-white" : "text-slate-500"
           }`}
         >
           BY
