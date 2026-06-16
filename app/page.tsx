@@ -26,7 +26,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.14.0-materials-admin";
+const APP_VERSION = "v0.14.2-material-reader";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -104,7 +104,7 @@ type StudyMaterial = {
   answer: string;
 };
 
-const ADMIN_EMAILS = ["hidehrouden@gmail.com"];
+const ADMIN_EMAILS = ["p4cf927mj7@privaterelay.appleid.com"];
 
 const defaultMaterialCategories: MaterialCategory[] = [
   { id: "default-textbooks", name: "Учебники" },
@@ -2502,6 +2502,124 @@ function MaterialsScreen({
   deleteMaterialCategory: (category: MaterialCategory) => void;
   checkMaterialAnswer: (material: StudyMaterial) => void;
 }) {
+  const [openedMaterial, setOpenedMaterial] = useState<StudyMaterial | null>(null);
+
+  function shortDescription(material: StudyMaterial) {
+    const clean = material.content.replace(/\s+/g, " ").trim();
+
+    if (!clean) {
+      if (material.hasTest) return "Материал с заданием или тестом.";
+      if (material.videoUrl || material.audioUrl) return "Материал с видео или аудио.";
+      return "Описание пока не добавлено.";
+    }
+
+    return clean.length > 160 ? `${clean.slice(0, 160)}...` : clean;
+  }
+
+  if (openedMaterial) {
+    return (
+      <section className="mx-auto max-w-4xl px-5 py-8">
+        <button
+          onClick={() => setOpenedMaterial(null)}
+          className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm"
+        >
+          ← {lang === "ru" ? "К списку материалов" : "Да спісу матэрыялаў"}
+        </button>
+
+        <article className="rounded-[2rem] bg-white p-6 shadow-xl">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">
+                {openedMaterial.category}
+              </p>
+              <h1 className="mt-4 text-4xl font-black">{openedMaterial.title}</h1>
+            </div>
+
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  deleteMaterial(openedMaterial.id);
+                  setOpenedMaterial(null);
+                }}
+                className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600"
+              >
+                Удалить
+              </button>
+            )}
+          </div>
+
+          <div className="mt-7 whitespace-pre-wrap text-lg font-bold leading-9 text-slate-700">
+            {openedMaterial.content || "Содержание пока не добавлено."}
+          </div>
+
+          {(openedMaterial.videoUrl || openedMaterial.audioUrl) && (
+            <div className="mt-7 flex flex-wrap gap-3">
+              {openedMaterial.videoUrl && (
+                <a
+                  href={openedMaterial.videoUrl}
+                  target="_blank"
+                  className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white"
+                >
+                  🎥 Видео
+                </a>
+              )}
+              {openedMaterial.audioUrl && (
+                <a
+                  href={openedMaterial.audioUrl}
+                  target="_blank"
+                  className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white"
+                >
+                  🔊 Аудио
+                </a>
+              )}
+            </div>
+          )}
+
+          {openedMaterial.hasTest && (
+            <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+              <p className="font-black uppercase tracking-[0.18em] text-lime-700">Тест</p>
+              <h3 className="mt-2 text-2xl font-black">{openedMaterial.question}</h3>
+
+              {openedMaterial.testType === "choice" ? (
+                <div className="mt-4 grid gap-2">
+                  {openedMaterial.options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => setMaterialAnswers((answers) => ({ ...answers, [openedMaterial.id]: option }))}
+                      className={`rounded-2xl px-4 py-3 text-left font-black ${
+                        materialAnswers[openedMaterial.id] === option ? "bg-lime-500 text-white" : "bg-white"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input
+                  value={materialAnswers[openedMaterial.id] || ""}
+                  onChange={(event) => setMaterialAnswers((answers) => ({ ...answers, [openedMaterial.id]: event.target.value }))}
+                  placeholder="Введи ответ"
+                  className="mt-4 w-full rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
+                />
+              )}
+
+              <button
+                onClick={() => checkMaterialAnswer(openedMaterial)}
+                className="mt-4 rounded-2xl bg-lime-500 px-6 py-3 font-black text-white"
+              >
+                {t.check}
+              </button>
+
+              {materialFeedback[openedMaterial.id] && (
+                <p className="mt-3 rounded-2xl bg-white p-4 font-black">{materialFeedback[openedMaterial.id]}</p>
+              )}
+            </div>
+          )}
+        </article>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-6xl px-5 py-8">
       <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">
@@ -2515,8 +2633,8 @@ function MaterialsScreen({
             <h1 className="mt-2 text-5xl font-black">{t.materials}</h1>
             <p className="mt-4 max-w-2xl text-lg font-bold text-slate-300">
               {lang === "ru"
-                ? "Материалы, которые собраны для всех пользователей. Они помогут вам в изучении языка."
-                : "Матэрыялы, якія сабраны для ўсіх карыстальнікаў. Яны дапамогуць вам у вывучэнні мовы."}
+                ? "Дополнительные материалы для изучения белорусского языка: тексты, упражнения, объяснения, видео и аудио."
+                : "Дадатковыя матэрыялы для вывучэння беларускай мовы: тэксты, практыкаванні, тлумачэнні, відэа і аўдыя."}
             </p>
           </div>
 
@@ -2534,7 +2652,7 @@ function MaterialsScreen({
 
         {isAdmin && (
           <p className="mt-4 rounded-2xl bg-white/10 p-3 text-sm font-bold text-slate-300">
-            Админ: {user?.email}. Если это не твой email, поменяй ADMIN_EMAILS в коде.
+            Режим администратора включён.
           </p>
         )}
       </div>
@@ -2669,78 +2787,54 @@ function MaterialsScreen({
         </div>
       )}
 
-      <div className="mt-6 grid gap-4">
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
         {materials.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm md:col-span-2">
             <p className="text-4xl">📭</p>
             <h2 className="mt-3 text-2xl font-black">Материалов пока нет</h2>
           </div>
         ) : (
           materials.map((material) => (
             <article key={material.id} className="rounded-[2rem] bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">{material.category}</p>
-                  <h2 className="mt-3 text-3xl font-black">{material.title}</h2>
+              <div className="flex h-full flex-col">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="inline-flex rounded-full bg-lime-100 px-3 py-1 text-sm font-black text-lime-700">
+                      {material.category}
+                    </p>
+                    <h2 className="mt-3 text-3xl font-black">{material.title}</h2>
+                  </div>
+
+                  {isAdmin && (
+                    <button onClick={() => deleteMaterial(material.id)} className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600">
+                      Удалить
+                    </button>
+                  )}
                 </div>
-                {isAdmin && (
-                  <button onClick={() => deleteMaterial(material.id)} className="rounded-2xl bg-red-50 px-4 py-3 font-black text-red-600">
-                    Удалить
-                  </button>
-                )}
-              </div>
 
-              <p className="mt-5 whitespace-pre-wrap text-lg font-bold leading-8 text-slate-700">{material.content}</p>
+                <p className="mt-4 text-base font-bold leading-7 text-slate-600">
+                  {shortDescription(material)}
+                </p>
 
-              {(material.videoUrl || material.audioUrl) && (
-                <div className="mt-5 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {material.hasTest && (
+                    <span className="rounded-full bg-sky-100 px-3 py-1 text-sm font-black text-sky-700">Тест</span>
+                  )}
                   {material.videoUrl && (
-                    <a href={material.videoUrl} target="_blank" className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white">
-                      🎥 Видео
-                    </a>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-700">Видео</span>
                   )}
                   {material.audioUrl && (
-                    <a href={material.audioUrl} target="_blank" className="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white">
-                      🔊 Аудио
-                    </a>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-700">Аудио</span>
                   )}
                 </div>
-              )}
 
-              {material.hasTest && (
-                <div className="mt-6 rounded-2xl bg-slate-50 p-5">
-                  <p className="font-black uppercase tracking-[0.18em] text-lime-700">Тест</p>
-                  <h3 className="mt-2 text-2xl font-black">{material.question}</h3>
-
-                  {material.testType === "choice" ? (
-                    <div className="mt-4 grid gap-2">
-                      {material.options.map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setMaterialAnswers((answers) => ({ ...answers, [material.id]: option }))}
-                          className={`rounded-2xl px-4 py-3 text-left font-black ${materialAnswers[material.id] === option ? "bg-lime-500 text-white" : "bg-white"}`}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <input
-                      value={materialAnswers[material.id] || ""}
-                      onChange={(event) => setMaterialAnswers((answers) => ({ ...answers, [material.id]: event.target.value }))}
-                      placeholder="Введи ответ"
-                      className="mt-4 w-full rounded-2xl border px-4 py-4 font-bold outline-none focus:border-lime-500"
-                    />
-                  )}
-
-                  <button onClick={() => checkMaterialAnswer(material)} className="mt-4 rounded-2xl bg-lime-500 px-6 py-3 font-black text-white">
-                    {t.check}
-                  </button>
-                  {materialFeedback[material.id] && (
-                    <p className="mt-3 rounded-2xl bg-white p-4 font-black">{materialFeedback[material.id]}</p>
-                  )}
-                </div>
-              )}
+                <button
+                  onClick={() => setOpenedMaterial(material)}
+                  className="mt-auto w-full rounded-2xl bg-lime-500 px-5 py-4 font-black text-white shadow-[0_5px_0_#65a30d]"
+                >
+                  Открыть
+                </button>
+              </div>
             </article>
           ))
         )}
@@ -2748,6 +2842,7 @@ function MaterialsScreen({
     </section>
   );
 }
+
 
 function NotesScreen({ t, lang, back }: { t: typeof tr.ru; lang: Lang; back: () => void }) {
   return (
