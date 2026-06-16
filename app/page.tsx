@@ -104,7 +104,7 @@ type StudyMaterial = {
   answer: string;
 };
 
-const ADMIN_EMAILS = ["czhmass@gmail.com];
+const ADMIN_EMAILS = ["czhmass@gmail.com"];
 
 const defaultMaterialCategories: MaterialCategory[] = [
   { id: "default-textbooks", name: "Учебники" },
