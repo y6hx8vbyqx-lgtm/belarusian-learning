@@ -20,7 +20,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.11.0-review-mistakes-footer-language";
+const APP_VERSION = "v0.11.1-slower-voice-stress";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -590,13 +590,160 @@ const tr = {
   },
 };
 
+const pronunciationMap: Record<string, string> = {
+  "так": "та́к",
+  "не": "не́",
+  "добры": "до́бры",
+  "дзень": "дзе́нь",
+  "вечар": "ве́чар",
+  "ноч": "но́ч",
+  "Беларусь": "Белару́сь",
+  "беларус": "белару́с",
+  "мова": "мо́ва",
+  "літара": "лі́тара",
+  "слова": "сло́ва",
+  "гук": "гу́к",
+
+  "вада": "вада́",
+  "зямля": "зямля́",
+  "людзі": "лю́дзі",
+  "дзеці": "дзе́ці",
+  "воўк": "воўк",
+  "сонца": "со́нца",
+  "малако": "малако́",
+  "цень": "це́нь",
+  "вецер": "ве́цер",
+  "лес": "ле́с",
+  "неба": "не́ба",
+
+  "Добры дзень": "До́бры дзе́нь",
+  "Добрай раніцы": "До́брай ра́ніцы",
+  "Добры вечар": "До́бры ве́чар",
+  "Прывітанне": "Прывіта́нне",
+  "Да пабачэння": "Да пабаче́ння",
+  "Бывай": "Быва́й",
+  "Як справы?": "Як спра́вы?",
+  "Добра": "До́бра",
+  "Дзякуй": "Дзя́куй",
+  "Калі ласка": "Калі́ ла́ска",
+  "Прабачце": "Праба́чце",
+  "Нічога": "Нічо́га",
+
+  "Я": "Я",
+  "Ты": "Ты",
+  "Ён": "Ён",
+  "Яна": "Яна́",
+  "Мы": "Мы",
+  "Вы": "Вы",
+  "Яны": "Яны́",
+  "студэнт": "студэ́нт",
+  "студэнтка": "студэ́нтка",
+  "чалавек": "чалаве́к",
+  "сябар": "ся́бар",
+  "сяброўка": "сябро́ўка",
+
+  "настаўнік": "наста́ўнік",
+  "лекар": "ле́кар",
+  "інжынер": "інжыне́р",
+  "праграміст": "праграмі́ст",
+  "пісьменнік": "пісьме́ннік",
+  "музыка": "му́зыка",
+  "мастак": "маста́к",
+  "кіроўца": "кіро́ўца",
+  "доктар": "до́ктар",
+  "работнік": "рабо́тнік",
+
+  "Расія": "Расі́я",
+  "Польшча": "По́льшча",
+  "Сербія": "Се́рбія",
+  "Германія": "Герма́нія",
+  "Японія": "Япо́нія",
+  "Грэцыя": "Грэ́цыя",
+  "Амерыка": "Аме́рыка",
+  "Канада": "Кана́да",
+  "Беларусі": "Белару́сі",
+  "Расіі": "Расі́і",
+  "Польшчы": "По́льшчы",
+  "Сербіі": "Се́рбіі",
+  "Германіі": "Герма́ніі",
+  "Японіі": "Япо́ніі",
+  "Грэцыі": "Грэ́цыі",
+  "Амерыкі": "Аме́рыкі",
+  "Канады": "Кана́ды",
+
+  "хто": "хто",
+  "што": "што",
+  "дзе": "дзе",
+  "адкуль": "адку́ль",
+  "як": "як",
+  "калі": "калі́",
+  "чаму": "чаму́",
+  "які": "які́",
+  "якая": "яка́я",
+  "колькі": "ко́лькі",
+  "імя": "і́мя",
+  "месца": "ме́сца",
+
+  "быць": "быць",
+  "жыць": "жыць",
+  "працаваць": "працава́ць",
+  "вучыцца": "вучы́цца",
+  "чытаць": "чыта́ць",
+  "любіць": "любі́ць",
+  "пісаць": "піса́ць",
+  "слухаць": "слу́хаць",
+  "гаварыць": "гавары́ць",
+  "ведаць": "ве́даць",
+  "разумець": "разуме́ць",
+  "хацець": "хаце́ць",
+
+  "Мяне завуць": "Мяне́ заву́ць",
+  "Я з Беларусі": "Я з Белару́сі",
+  "Я з Расіі": "Я з Расі́і",
+  "Я з Польшчы": "Я з По́льшчы",
+  "Я з Сербіі": "Я з Се́рбіі",
+  "Я з Германіі": "Я з Герма́ніі",
+  "Я з Японіі": "Я з Япо́ніі",
+  "Я з Грэцыі": "Я з Грэ́цыі",
+  "Я з Амерыкі": "Я з Аме́рыкі",
+  "Я з Канады": "Я з Кана́ды",
+  "Я праграміст": "Я праграмі́ст",
+  "Я студэнт": "Я студэ́нт",
+  "Прыемна пазнаёміцца": "Пры́емна пазнаё́міцца",
+  "Як цябе завуць?": "Як цябе́ заву́ць?",
+  "Адкуль ты?": "Адку́ль ты?",
+  "Кім ты працуеш?": "Кім ты працу́еш?",
+  "Да сустрэчы": "Да сустре́чы",
+  "Вельмі прыемна": "Ве́льмі пры́емна",
+
+  "Мяне завуць Аляксей": "Мяне́ заву́ць Аляксе́й",
+  "Вучу беларускую мову": "Вучу́ белару́скую мо́ву",
+  "беларускую": "белару́скую",
+};
+
+function getDisplayBe(value: string) {
+  return pronunciationMap[value] || value;
+}
+
+function getSpokenText(value: string) {
+  const direct = pronunciationMap[value];
+
+  if (direct) return direct;
+
+  return value
+    .split(" ")
+    .map((part) => pronunciationMap[part] || part)
+    .join(" ");
+}
+
 function speak(value: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
   const synth = window.speechSynthesis;
   synth.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(value);
+  const spokenText = getSpokenText(value);
+  const utterance = new SpeechSynthesisUtterance(spokenText);
   const voices = synth.getVoices();
 
   const preferredVoice =
@@ -615,7 +762,7 @@ function speak(value: string) {
     utterance.lang = "be-BY";
   }
 
-  utterance.rate = 0.88;
+  utterance.rate = 0.68;
   utterance.pitch = 1;
   utterance.volume = 1;
 
@@ -1184,8 +1331,8 @@ function TrueFalseTask({ t, word, answer, choose }: { t: typeof tr.ru; word: Wor
     <>
       <button onClick={() => speak(word.be)} className="w-full rounded-3xl bg-white p-6 text-left text-slate-950">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t.trueFalse}</p>
-        <p className="mt-2 text-6xl font-black">{word.be} 🔊</p>
-        <p className="mt-3 text-xl font-black text-slate-500">{word.be} = {word.ru}</p>
+        <p className="mt-2 text-6xl font-black">{getDisplayBe(word.be)} 🔊</p>
+        <p className="mt-3 text-xl font-black text-slate-500">{getDisplayBe(word.be)} = {word.ru}</p>
       </button>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <button onClick={() => choose("true")} disabled={Boolean(answer)} className="rounded-2xl bg-lime-500 px-5 py-4 text-lg font-black text-white">{t.yes}</button>
@@ -1242,7 +1389,7 @@ function BuildTask({
                   onClick={() => setBuiltWords(builtWords.filter((_, i) => i !== index))}
                   className="rounded-xl bg-lime-100 px-4 py-2 font-black text-lime-700"
                 >
-                  {word}
+                  {getDisplayBe(word)}
                 </button>
               ))}
             </div>
@@ -1337,7 +1484,7 @@ function OptionGrid({ options, answer, correct, choose, audio = false }: { optio
               : "border-white/10 bg-white/10 hover:bg-lime-400 hover:text-slate-950"
           }`}
         >
-          {option} {audio && <span className="float-right">🔊</span>}
+          {audio ? getDisplayBe(option) : option} {audio && <span className="float-right">🔊</span>}
         </button>
       ))}
     </div>
@@ -1352,7 +1499,7 @@ function WordsTrainer({ t, words, index, setIndex, back }: { t: typeof tr.ru; wo
       <button onClick={back} className="mb-5 rounded-2xl bg-white px-5 py-3 font-black shadow-sm">← {t.back}</button>
       <div className="rounded-[2rem] bg-white p-6 text-center shadow-xl">
         <p className="font-black uppercase tracking-[0.2em] text-lime-700">{t.wordsMode}</p>
-        <button onClick={() => speak(word.be)} className="mt-8 text-7xl font-black">{word.be} 🔊</button>
+        <button onClick={() => speak(word.be)} className="mt-8 text-7xl font-black">{getDisplayBe(word.be)} 🔊</button>
         <p className="mt-5 text-3xl font-black text-slate-500">{word.ru}</p>
         <button onClick={() => setIndex((value) => value + 1)} className="mt-8 w-full rounded-2xl bg-lime-500 py-4 text-lg font-black text-white shadow-[0_5px_0_#65a30d]">
           {t.next}
