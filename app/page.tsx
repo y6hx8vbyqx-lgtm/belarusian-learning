@@ -196,6 +196,41 @@ function getWrongRuOptions(correctRu: string, lessonId: number) {
   return [...lessonWords, ...moduleWords].slice(0, 2);
 }
 
+
+function getFriendlyAuthError(error: unknown) {
+  const message = error instanceof Error ? error.message : "";
+
+  if (message.includes("auth/email-already-in-use")) {
+    return "Аккаунт с таким email уже есть. Нажми «Уже есть аккаунт? Войти».";
+  }
+
+  if (message.includes("auth/invalid-credential")) {
+    return "Неверный email или пароль.";
+  }
+
+  if (message.includes("auth/user-not-found")) {
+    return "Аккаунт с таким email не найден.";
+  }
+
+  if (message.includes("auth/wrong-password")) {
+    return "Неверный пароль.";
+  }
+
+  if (message.includes("auth/weak-password")) {
+    return "Пароль должен быть минимум 6 символов.";
+  }
+
+  if (message.includes("auth/invalid-email")) {
+    return "Введите корректный email.";
+  }
+
+  if (message.includes("Missing or insufficient permissions")) {
+    return "Нет доступа к профилю. Проверь правила Firestore.";
+  }
+
+  return "Что-то пошло не так. Попробуй ещё раз.";
+}
+
 export default function Home() {
   const [lang, setLang] = useState<Lang>("ru");
   const [screen, setScreen] = useState<Screen>("landing");
@@ -296,7 +331,7 @@ export default function Home() {
       setEmail("");
       setPassword("");
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Ошибка");
+      setMsg(getFriendlyAuthError(e));
     }
   }
 
@@ -407,9 +442,6 @@ export default function Home() {
         <section className="mx-auto max-w-xl px-5 py-12">
           <div className="rounded-[2rem] bg-white p-6 shadow-xl">
             <h1 className="text-4xl font-black">{t.authTitle}</h1>
-            <p className="mt-2 text-sm font-bold text-lime-700">
-              Firebase Auth · {APP_VERSION}
-            </p>
             <div className="mt-6 space-y-3">
               <input
                 value={email}
@@ -637,7 +669,7 @@ export default function Home() {
         </section>
       )}
 
-      <div className="fixed bottom-2 right-3 z-50 rounded-full bg-slate-950/80 px-3 py-1 text-[11px] font-black text-white">
+      <div className="fixed bottom-1 right-2 z-50 text-[10px] font-medium text-slate-300/70">
         {APP_VERSION}
       </div>
       <LanguageSwitch lang={lang} setLang={changeLang} t={t} />
