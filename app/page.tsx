@@ -26,7 +26,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-const APP_VERSION = "v0.16.1-module-3-fixed";
+const APP_VERSION = "v0.16.2-task-answer-fix";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3xr9pXw4OwifjdoxGH1xEYZYl9o86Y6w",
@@ -2522,6 +2522,14 @@ export default function Home() {
   const finishTask = selectedLesson.tasks.find((task) => task.type === "finish") || selectedLesson.tasks[selectedLesson.tasks.length - 1];
   const currentTask = reviewMode ? reviewTasks[reviewIndex] || finishTask : selectedLesson.tasks[taskIndex];
   const currentWord = currentTask?.word || selectedLesson.words[0];
+  const currentCorrectAnswer =
+    currentTask.type === "build"
+      ? currentTask.sentenceBe || ""
+      : currentTask.type === "audio"
+      ? currentWord.ru
+      : currentTask.type === "trueFalse"
+      ? "true"
+      : currentTask.correctAnswer || currentWord.be;
   const courseModules = [
     { id: 1, start: 1, end: 10, total: 10, emoji: "📖", titleRu: "Первые шаги", titleBe: "Першыя крокі", descriptionRu: "Алфавит, приветствия и знакомство.", descriptionBe: "Алфавіт, вітанні і знаёмства." },
     { id: 2, start: 11, end: 20, total: 10, emoji: "👨‍👩‍👧‍👦", titleRu: "Семья и люди", titleBe: "Сям'я і людзі", descriptionRu: "Семья, люди, числа и описания.", descriptionBe: "Сям'я, людзі, лікі і апісанні." },
@@ -2853,11 +2861,7 @@ export default function Home() {
 
     setAnswer(option);
 
-    const isCorrect =
-      option === currentTask.correctAnswer ||
-      option === currentWord.be ||
-      option === currentWord.ru ||
-      option === "true";
+    const isCorrect = option === currentCorrectAnswer;
 
     rememberMistakeIfNeeded(isCorrect);
   }
@@ -3237,13 +3241,9 @@ export default function Home() {
             {answer && currentTask.type !== "finish" && (
               <>
                 <div className="mt-4 rounded-2xl bg-white p-4 font-black text-slate-950">
-                  {currentTask.type === "build"
-                    ? answer === currentTask.sentenceBe
-                      ? t.correct
-                      : `${t.wrong} ${currentTask.sentenceBe}`
-                    : answer === currentWord.be || answer === currentWord.ru || answer === "true"
+                  {answer === currentCorrectAnswer
                     ? t.correct
-                    : `${t.wrong} ${currentWord.be}`}
+                    : `${t.wrong} ${currentCorrectAnswer}`}
                 </div>
                 <button
                   onClick={nextTask}
